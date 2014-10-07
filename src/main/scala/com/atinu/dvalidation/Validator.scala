@@ -55,7 +55,7 @@ object DomainErrors {
   implicit class dValFirstSuccess[T](val value: DValidation[T]) extends AnyVal {
     def isValidOr[R <: T](next: => DValidation[R]) = value.findSuccess(next)
     def forAttribute(attr: String): DValidation[T] = value.swap.map{ errors =>
-      DomainErrors(errors.errors.map(e => new AttributeScope(attr, e)))
+      DomainErrors(errors.errors.map(e => e.nestPath(attr)))
     }.swap
   }
 
@@ -76,26 +76,40 @@ case class DomainErrors(errors: NonEmptyList[DomainError]) {
 trait DomainError {
   def value: Any
   def msgKey: String
+  def path: String
+  def nestPath(segment: String): DomainError = {
+    val newPath =
+      if(path == "/") s"/$segment"
+      else s"/$segment$path"
+    copyWithPath(newPath)
+  }
+  def copyWithPath(path: String): DomainError
 }
 
-abstract class AbstractDomainError(valueP: Any, msgKeyP: String) extends DomainError {
+abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String = "/") extends DomainError {
   def value = valueP
   def msgKey = msgKeyP
+  def path = pathP
 
-  override def toString = s"""DomainError(value: $value, msgKey: $msgKey)"""
+  override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey)"""
 }
 
-abstract class ContainerDomainError(value: Any, msgKey: String, childError: DomainError) extends AbstractDomainError(value, msgKey)
-
-class AttributeScope(attr: String, childError: DomainError) extends ContainerDomainError(childError.value, childError.msgKey, childError) {
-  override def toString = s"""AttributeScope(attr: $attr, error: $childError)"""
+class IsEmptyStringError(value: String, path: String = "/") extends AbstractDomainError(value, "error.dvalidation.emptyString", path) {
+   def copyWithPath(path: String): IsEmptyStringError = new IsEmptyStringError(value, path)
 }
 
-class IsEmptyStringError(value: String) extends AbstractDomainError(value, "error.dvalidation.emptyString")
+class IsEmptySeqError(value: Traversable[_], path: String = "/") extends AbstractDomainError(value, "error.dvalidation.emptySeq", path) {
 
-class IsEmptySeqError(value: Traversable[_]) extends AbstractDomainError(value, "error.dvalidation.emptySeq")
+   def copyWithPath(path: String): IsEmptySeqError = new IsEmptySeqError(value, path)
+}
 
-class IsNoneError(value: Option[_]) extends AbstractDomainError(value, "error.dvalidation.isNone")
+class IsNoneError(value: Option[_], path: String = "/") extends AbstractDomainError(value, "error.dvalidation.isNone", path) {
 
-class CustomValidationError(value: Any, key: String) extends AbstractDomainError(value, key)
+   def copyWithPath(path: String): IsNoneError = new IsNoneError(value, path)
+}
+
+class CustomValidationError(value: Any, key: String, path: String = "/") extends AbstractDomainError(value, key, path) {
+
+   def copyWithPath(path: String): CustomValidationError = new CustomValidationError(value, key, path)
+}
 

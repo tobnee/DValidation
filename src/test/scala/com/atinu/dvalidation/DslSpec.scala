@@ -119,13 +119,24 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
     res should beInvalid
   }
 
+  case class VTestNested(value: Int, nest: VTest)
+
   test("validate case class for attribute") {
     val vtest = VTest(1, "", Some("a"))
-    val res = vtest.validateWith(
+    val validateWith = vtest.validateWith(
       ensure(vtest.a)("should be 1", _ == 2).forAttribute("a"),
       notEmpty(vtest.b).forAttribute("b")
-    ).forAttribute("global")
-    println(res.swap.toOption.get.prettyPrint)
-    res should beInvalid
+    )
+    val resVtest: DValidation[VTest] = validateWith.forAttribute("global")
+    println(resVtest.swap.toOption.get.prettyPrint)
+    resVtest should beInvalid
+
+    val vTestNested = VTestNested(5, vtest)
+    val resNest = vTestNested.validateWith(
+      ensure(vTestNested.value)("should be 1", _ == 1).forAttribute("value"),
+      validateWith.forAttribute("nest")
+    )
+    println(resNest.swap.toOption.get.prettyPrint)
+
   }
 }
