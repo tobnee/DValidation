@@ -17,11 +17,11 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("validate any value") {
-    ensure(1)("should be 1", a => a == 1) should beValid
+    ensure(1)("should be 1", _ == 1) should beValid
   }
 
   test("validate any value 2") {
-    ensure(1)("should be 1", a => a == 2) should beInvalid
+    ensure(1)("should be 1", _ == 2) should beInvalid
   }
 
   test("List is empty") {
@@ -97,6 +97,11 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
     a should beValid
   }
 
+  test("do a custom validation 2") {
+    val a = DomainErrors.validate("a")(_ == "a")(error = new CustomValidationError("a", "error.notA"))
+    a should beValid
+  }
+
   case class VTest(a: Int, b: String, c: Option[String])
 
   test("validate case class") {
@@ -128,7 +133,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       notEmpty(vtest.b).forAttribute("b")
     )
     val resVtest: DValidation[VTest] = validateWith.forAttribute("global")
-    println(resVtest.swap.toOption.get.prettyPrint)
+    println(resVtest.errorView.get.prettyPrint)
     resVtest should beInvalid
 
     val vTestNested = VTestNested(5, vtest)
@@ -136,6 +141,6 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       ensure(vTestNested.value)("should be 1", _ == 1).forAttribute("value"),
       validateWith.forAttribute("nest")
     )
-    println(resNest.swap.toOption.get.prettyPrint)
+    println(resNest.errorView.get.prettyPrint)
   }
 }
