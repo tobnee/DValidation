@@ -137,6 +137,5 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       validateWith.forAttribute("nest")
     )
     println(resNest.swap.toOption.get.prettyPrint)
-
   }
 }

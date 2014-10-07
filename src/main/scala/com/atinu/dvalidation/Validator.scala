@@ -27,9 +27,9 @@ object DomainErrors {
   type DValidation[T] = Validation[DomainErrors, T]
 
   def invalid[T](value: Any, key: String) = new CustomValidationError(value, key).invalid[T]
-  
+
   def valid[T](value: T): DValidation[T] = value.valid
-  
+
   implicit class ErrorToErrors(val error: DomainError) extends AnyVal {
     def invalid[T] = new DomainErrors(NonEmptyList.apply(error)).fail[T]
   }
@@ -53,9 +53,10 @@ object DomainErrors {
 
   implicit class dValFirstSuccess[T](val value: DValidation[T]) extends AnyVal {
     def isValidOr[R <: T](next: => DValidation[R]) = value.findSuccess(next)
-    def forAttribute(attr: String): DValidation[T] = value.swap.map{ errors =>
-      DomainErrors(errors.errors.map(e => e.nestPath(attr)))
-    }.swap
+    def forAttribute(attr: String): DValidation[T] = {
+      value.leftMap(domainErrors => domainErrors.copy(errors =
+        domainErrors.errors.map(e => e.nestPath(attr))))
+    }
   }
 
   implicit def errorsSemiGroup: Semigroup[DomainErrors] =
