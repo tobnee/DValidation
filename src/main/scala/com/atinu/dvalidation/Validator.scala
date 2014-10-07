@@ -39,18 +39,17 @@ object DomainErrors {
   }
 
   implicit class tToValidation[T](val value: T) extends AnyVal {
+    import syntax.semigroup._
     def validateWith(validations: DValidation[_]*): DValidation[T] = {
       val validValue = valid(value)
       validations.foldLeft(validValue) {
         case (Success(_), Success(_)) => validValue
         case (Success(_), e @ Failure(_)) => e.asInstanceOf[DValidation[T]]
-        case (Failure(e1), Failure(e2)) => errorsSemiGroup.append(e1, e2).fail
+        case (Failure(e1), Failure(e2)) => (e1 |+| e2).fail
         case (e @Failure(_), Success(_)) => e.asInstanceOf[DValidation[T]]
       }
     }
   }
-
-
 
   implicit class dValFirstSuccess[T](val value: DValidation[T]) extends AnyVal {
     def isValidOr[R <: T](next: => DValidation[R]) = value.findSuccess(next)
