@@ -14,7 +14,7 @@ object Validator {
   def hasElements[T <: Traversable[_]](s: T): DValidation[T] =
     if (s.isEmpty) new IsEmptySeqError(s).invalid else s.valid
 
-  def hasElement[T <: Option[_]](s: T): DValidation[T] =
+  def isSome[T <: Option[_]](s: T): DValidation[T] =
     if (s.isEmpty) new IsNoneError(s).invalid else s.valid
 
   def ensure[T](s: T)(errorStr: String, v: T => Boolean): DValidation[T] =

@@ -34,21 +34,21 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("Option is empty") {
-    hasElement(None.asInstanceOf[Option[String]]) should beInvalid
+    isSome(None.asInstanceOf[Option[String]]) should beInvalid
   }
 
   test("Option is not empty") {
-    val a: DValidation[Option[Int]] = hasElement(Some(1).asInstanceOf[Option[Int]])
+    val a: DValidation[Option[Int]] = isSome(Some(1))
     a should beValid
   }
 
   test("Option should be validated") {
-    val a = hasElement(Some(1).asInstanceOf[Option[Int]]).ensure("error")(_.get == 1)
+    val a = isSome(Some(1)).ensure("error")(_.get == 1)
     a should beValid
   }
 
   test("Option should be validated 2") {
-    val a = hasElement(Some(1).asInstanceOf[Option[Int]]).ensure("error")(_.get == 2)
+    val a = isSome(Some(1)).ensure("error")(_.get == 2)
     a should beInvalid
   }
 
@@ -127,10 +127,11 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   case class VTestNested(value: Int, nest: VTest)
 
   test("validate case class for attribute") {
-    val vtest = VTest(1, "", Some("a"))
+    val vtest = VTest(1, "", None)
     val validateWith = vtest.validateWith(
       ensure(vtest.a)("should be 1", _ == 2).forAttribute("a"),
-      notEmpty(vtest.b).forAttribute("b")
+      notEmpty(vtest.b).forAttribute("b"),
+      isSome(vtest.c).forAttribute("c")
     )
     val resVtest: DValidation[VTest] = validateWith.forAttribute("global")
     println(resVtest.errorView.get.prettyPrint)
