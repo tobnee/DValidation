@@ -17,11 +17,11 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("validate any value") {
-    ensure(1)("should be 1", _ == 1) should beValid
+    ensure(1)("error.dvalidation.isequal", 1)(_ == 1) should beValid
   }
 
   test("validate any value 2") {
-    ensure(1)("should be 1", _ == 2) should beInvalid
+    ensure(1)("error.dvalidation.isequal", 2)( _ == 2) should beInvalid
   }
 
   test("List is empty") {
@@ -52,10 +52,13 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
     a should beInvalid
   }
 
+  def isEqual[T](valueExcept:T, valueCheck: T) =
+    ensure(valueCheck)("error.dvalidation.isequal", valueExcept)( a => a == valueExcept)
+
   test("define a validation chain") {
     val a = 1
-    val v1 = ensure(a)("should be 1", a => a == 1)
-    val v2 = ensure(a)("should be 2", a => a == 2)
+    val v1 = isEqual(a, 1)
+    val v2 = isEqual(a, 2)
 
     val resV = v1.findSuccess(v2)
 
@@ -64,8 +67,8 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
 
   test("define a validation chain2") {
     val a = 3
-    val v1 = ensure(a)("should be 1", a => a == 1)
-    val v2 = ensure(a)("should be 2", a => a == 2)
+    val v1 = isEqual(a, 1)
+    val v2 = isEqual(a, 2)
 
     val resV = v1.findSuccess(v2)
 
@@ -74,8 +77,8 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
 
   test("define a specific validation chain") {
     val a = 1
-    val v1 = ensure(a)("should be 1", a => a == 1)
-    val v2 = ensure(a)("should be 2", a => a == 2)
+    val v1 = isEqual(a, 1)
+    val v2 = isEqual(a, 2)
 
     val resV = v1.isValidOr(v2)
 
@@ -84,8 +87,8 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
 
   test("define a specific validation chain2") {
     val a = 3
-    val v1 = ensure(a)("should be 1", a => a == 1)
-    val v2 = ensure(a)("should be 2", a => a == 2)
+    val v1 = isEqual(a, 1)
+    val v2 = isEqual(a, 2)
 
     val resV = v1 isValidOr v2
 
@@ -107,7 +110,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   test("validate case class") {
     val vtest = VTest(1, "sdf", Some("a"))
     val res: DValidation[VTest] = vtest.validateWith(
-      ensure(vtest.a)("should be 1", _ == 1),
+      ensure(vtest.a)("should be 1", 1)(_ == 1),
       notEmpty(vtest.b)
     )
     res should beValid
@@ -117,7 +120,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   test("validate case class 2") {
     val vtest = VTest(1, "", Some("a"))
     val res = vtest.validateWith(
-      ensure(vtest.a)("should be 1", _ == 2),
+      ensure(vtest.a)("should be 2", 2)(_ == 2),
       notEmpty(vtest.b)
     )
     println(res)
@@ -129,7 +132,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   test("validate case class for attribute") {
     val vtest = VTest(1, "", None)
     val validateWith = vtest.validateWith(
-      ensure(vtest.a)("should be 1", _ == 2).forAttribute("a"),
+      isEqual(vtest.a, 2).forAttribute("a"),
       notEmpty(vtest.b).forAttribute("b"),
       isSome(vtest.c).forAttribute("c")
     )
@@ -138,7 +141,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
 
     val vTestNested = VTestNested(5, vtest)
     val resNest = vTestNested.validateWith(
-      ensure(vTestNested.value)("should be 1", _ == 1).forAttribute("value"),
+      isEqual(vTestNested.value, 1).forAttribute("value"),
       validateWith.forAttribute("nest")
     )
     println(resNest.errorView.get.prettyPrint)

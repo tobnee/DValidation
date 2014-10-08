@@ -17,8 +17,8 @@ object Validator {
   def isSome[T <: Option[_]](s: T): DValidation[T] =
     if (s.isEmpty) new IsNoneError(s).invalid else s.valid
 
-  def ensure[T](s: T)(errorStr: String, v: T => Boolean): DValidation[T] =
-    if (v(s)) s.success else new CustomValidationError(s, errorStr).invalid
+  def ensure[T](s: T)(key: String, args: Any*)(v: T => Boolean): DValidation[T] =
+    if (v(s)) s.success else new CustomValidationError(s, key, args.map(_.toString)).invalid
 
 }
 
@@ -28,6 +28,8 @@ object DomainErrors {
 
   def invalid[T](value: Any, key: String) = new CustomValidationError(value, key).invalid[T]
 
+  def invalid[T](value: Any, key: String, args: String*) = new CustomValidationError(value, key, args.toSeq).invalid[T]
+  
   def valid[T](value: T): DValidation[T] = value.valid
 
   def validate[T](value: T)(cond: T => Boolean)(error: => DomainError): DValidation[T] =
@@ -92,12 +94,15 @@ trait DomainError {
   def copyWithPath(path: String): DomainError
 }
 
-abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String = "/") extends DomainError {
+abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String = "/", argsP: Seq[String] = Nil) extends DomainError {
   def value = valueP
   def msgKey = msgKeyP
   def path = pathP
+  def args = argsP
 
-  override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey)"""
+  private def argsString = if(args.isEmpty) "" else s", args: ${args.mkString(",")}"
+
+  override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey$argsString)"""
 }
 
 class IsEmptyStringError(value: String, path: String = "/") extends AbstractDomainError(value, "error.dvalidation.emptyString", path) {
@@ -114,8 +119,8 @@ class IsNoneError(value: Option[_], path: String = "/") extends AbstractDomainEr
    def copyWithPath(path: String): IsNoneError = new IsNoneError(value, path)
 }
 
-class CustomValidationError(value: Any, key: String, path: String = "/") extends AbstractDomainError(value, key, path) {
+class CustomValidationError(value: Any, key: String, args: Seq[String] = Nil, path: String = "/") extends AbstractDomainError(value, key, path, args) {
 
-   def copyWithPath(path: String): CustomValidationError = new CustomValidationError(value, key, path)
+   def copyWithPath(path: String): CustomValidationError = new CustomValidationError(value, key, args, path)
 }
 
