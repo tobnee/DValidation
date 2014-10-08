@@ -132,17 +132,17 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   test("validate case class for attribute") {
     val vtest = VTest(1, "", None)
     val validateWith = vtest.validateWith(
-      isEqual(vtest.a, 2).forAttribute("a"),
-      notEmpty(vtest.b).forAttribute("b"),
-      isSome(vtest.c).forAttribute("c")
+      isEqual(vtest.a, 2).forAttribute('a),
+      notEmpty(vtest.b).forAttribute('b),
+      isSome(vtest.c).forAttribute('c)
     )
     println(validateWith.errorView.get.prettyPrint)
     validateWith should beInvalid
 
     val vTestNested = VTestNested(5, vtest)
     val resNest = vTestNested.validateWith(
-      isEqual(vTestNested.value, 1).forAttribute("value"),
-      validateWith.forAttribute("nest")
+      isEqual(vTestNested.value, 1).forAttribute('value),
+      validateWith.forAttribute('nest)
     )
     println(resNest.errorView.get.prettyPrint)
   }

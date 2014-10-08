@@ -59,9 +59,9 @@ object DomainErrors {
   implicit class dValFirstSuccess[T](val value: DValidation[T]) extends AnyVal {
     def isValidOr[R <: T](next: => DValidation[R]) = value.findSuccess(next)
 
-    def forAttribute(attr: String): DValidation[T] = {
+    def forAttribute(attr: Symbol): DValidation[T] = {
       value.leftMap(domainErrors => domainErrors.copy(errors =
-        domainErrors.errors.map(e => e.nestPath(attr))))
+        domainErrors.errors.map(e => e.nestPath(attr.name))))
     }
 
     def errorView = value.fold(Option.apply, _ => None)
