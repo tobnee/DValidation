@@ -133,9 +133,8 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       notEmpty(vtest.b).forAttribute("b"),
       isSome(vtest.c).forAttribute("c")
     )
-    val resVtest: DValidation[VTest] = validateWith.forAttribute("global")
-    println(resVtest.errorView.get.prettyPrint)
-    resVtest should beInvalid
+    println(validateWith.errorView.get.prettyPrint)
+    validateWith should beInvalid
 
     val vTestNested = VTestNested(5, vtest)
     val resNest = vTestNested.validateWith(
