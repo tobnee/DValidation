@@ -113,7 +113,6 @@ trait DomainError {
   def msgKey: String
   def path: String
   def nestPath(segment: String): DomainError
-  def copyWithPath(path: String): DomainError
 }
 
 abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String = "/", argsP: Seq[String] = Nil) extends DomainError {
@@ -121,6 +120,8 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String =
   def msgKey = msgKeyP
   def path = pathP
   def args = argsP
+
+  def copyWithPath(path: String): DomainError
 
   def nestPath(segment: String): DomainError = {
     val newPath =
