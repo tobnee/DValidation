@@ -25,6 +25,11 @@ object Validator {
       withPath(validator(value), s"[$idx]")
     }
   }
+
+  def validate[T](value: T)(cond: T => Boolean)(error: => DomainError): DValidation[T] =
+    if(cond(value)) value.valid else error.invalid
+
+  def template[T](v: DValidator[T]):DValidator[T] = v
 }
 
 object DomainErrors {
@@ -38,10 +43,6 @@ object DomainErrors {
   
   def valid[T](value: T): DValidation[T] = value.valid
 
-  def validate[T](value: T)(cond: T => Boolean)(error: => DomainError): DValidation[T] =
-    if(cond(value)) value.valid else error.invalid
-
-  def dvalidator[T](v: DValidator[T]):DValidator[T] = v
 
   def doValidation[T](validations: Seq[DValidation[_]], value: T): DValidation[T] = {
     val validValue = valid(value)
@@ -84,7 +85,6 @@ object DomainErrors {
   }
 
   implicit class dValFirstSuccess[T](val value: DValidation[T]) extends AnyVal {
-    import syntax.semigroup._
 
     def isValidOr[R <: T](next: => DValidation[R]) = value.findSuccess(next)
 

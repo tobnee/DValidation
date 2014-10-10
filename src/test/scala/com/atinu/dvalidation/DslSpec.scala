@@ -101,7 +101,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("do a custom validation 2") {
-    val a = DomainErrors.validate("a")(_ == "a")(error = new CustomValidationError("a", "error.notA"))
+    val a = Validator.validate("a")(_ == "a")(error = new CustomValidationError("a", "error.notA"))
     a should beValid
   }
 
@@ -154,7 +154,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
     val vtest2 = VTest(2, "", Some("d"))
     val vtseq = VTestSeq(1, Seq(vtest, vtest2))
 
-    val vtestValidator: DValidator[VTest] = DomainErrors.dvalidator[VTest] { value =>
+    val vtestValidator: DValidator[VTest] = Validator.template[VTest] { value =>
       value.validateWith(
         isEqual(2, value.a) forAttribute 'a,
         notEmpty(value.b) forAttribute 'b,
