@@ -82,7 +82,7 @@ object Validator {
 
     def errorView = value.fold(Option.apply, _ => None)
 
-    def withValidations(validations: IndexedSeq[DValidation[_]]) =
+    def withValidations(validations: Seq[DValidation[_]]) =
       validateAll(validations.toSeq, value)
   }
 
