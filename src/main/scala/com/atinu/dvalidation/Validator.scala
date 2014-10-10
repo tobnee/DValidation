@@ -50,6 +50,10 @@ object Validator {
     }
   }
 
+  implicit class optToValidation[T](val value: Option[T]) extends AnyVal {
+    def asValidation: DValidation[T] = isSome(value).map(_.get)
+  }
+
   implicit class dSeqValidation[T](val value: IndexedSeq[DValidation[T]]) extends AnyVal {
     def forAttribute(attr: Symbol): IndexedSeq[DValidation[T]] = {
       value.map(validation => withPath(validation, attr.name))
@@ -70,14 +74,6 @@ object Validator {
     def withValidations(validations: IndexedSeq[DValidation[_]]) =
       validateAll(validations.toSeq, value)
   }
-
-  implicit def errorsSemiGroup: Semigroup[DomainErrors] =
-    new Semigroup[DomainErrors] {
-      def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {
-        val errors = Semigroup[NonEmptyList[DomainError]].append(f1.errors, f2.errors)
-        new DomainErrors(errors)
-      }
-    }
 
   private[dvalidation] def withPath[T](value: DValidation[T], path: String) = {
     value.leftMap(domainErrors => domainErrors.copy(errors =
@@ -101,6 +97,14 @@ object Validator {
       case (e@Failure(_), Success(_)) => failed(e)
     }
   }
+
+  implicit def errorsSemiGroup: Semigroup[DomainErrors] =
+    new Semigroup[DomainErrors] {
+      def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {
+        val errors = Semigroup[NonEmptyList[DomainError]].append(f1.errors, f2.errors)
+        new DomainErrors(errors)
+      }
+    }
 }
 
 case class DomainErrors(errors: NonEmptyList[DomainError]) {

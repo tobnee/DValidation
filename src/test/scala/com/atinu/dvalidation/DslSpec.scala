@@ -51,6 +51,15 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
     a should beInvalid
   }
 
+  test("Option can be seen as valid validation") {
+    Some(1).asValidation should beValid
+  }
+
+  test("Option can be seen as invalid validation") {
+    val opt: Option[Int] = None
+    opt.asValidation should beInvalid
+  }
+
   def isEqual[T](valueExcept:T, valueCheck: T) =
     ensure(valueCheck)("error.dvalidation.isequal", valueExcept)( a => a == valueExcept)
 
