@@ -1,5 +1,6 @@
 package com.atinu.dvalidation
 
+import scala.util.Try
 import scalaz._
 import scalaz.NonEmptyList._
 import scalaz.syntax.validation._
@@ -15,6 +16,12 @@ object Validator {
 
   def isSome[T <: Option[_]](s: T): DValidation[T] =
     if (s.isEmpty) new IsNoneError(s).invalid else s.valid
+
+  def isTrySuccess[T <: Try[_]](s: T): DValidation[T] =
+    s match {
+      case value:scala.util.Success[_] => s.success
+      case scala.util.Failure(e) => new IsTryFailureError(e).invalid
+    }
 
   def ensure[T](s: T)(key: String, args: Any*)(v: T => Boolean): DValidation[T] =
     if (v(s)) s.success else new CustomValidationError(s, key, args.map(_.toString)).invalid
@@ -48,6 +55,10 @@ object Validator {
     def validateWith(validations: DValidation[_]*): DValidation[T] = {
       applyValidations(validations, value)
     }
+  }
+
+  implicit class tryToValidation[T](val value: Try[T]) extends AnyVal {
+    def asValidation: DValidation[T] = isTrySuccess(value).map(_.get)
   }
 
   implicit class optToValidation[T](val value: Option[T]) extends AnyVal {
@@ -151,6 +162,11 @@ class IsEmptySeqError(value: Traversable[_], path: String = "/") extends Abstrac
 class IsNoneError(value: Option[_], path: String = "/") extends AbstractDomainError(value, "error.dvalidation.isNone", path) {
 
    def copyWithPath(path: String): IsNoneError = new IsNoneError(value, path)
+}
+
+class IsTryFailureError(value: Throwable, path: String = "/") extends AbstractDomainError(value, "error.dvalidation.isTryFailue", path) {
+
+  def copyWithPath(path: String): IsTryFailureError = new IsTryFailureError(value, path)
 }
 
 class CustomValidationError(value: Any, key: String, args: Seq[String] = Nil, path: String = "/") extends AbstractDomainError(value, key, path, args) {
