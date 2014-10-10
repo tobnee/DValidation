@@ -123,7 +123,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       ensure(vtest.a)("should be 2", 2)(_ == 2),
       notEmpty(vtest.b)
     )
-    println(res)
+    //println(res)
     res should beInvalid
   }
 
@@ -136,7 +136,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       notEmpty(vtest.b) forAttribute 'b,
       isSome(vtest.c) forAttribute 'c
     )
-    println(validateWith.errorView.get.prettyPrint)
+    //println(validateWith.errorView.get.prettyPrint)
     validateWith should beInvalid
 
     val vTestNested = VTestNested(5, vtest)
@@ -144,6 +144,30 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       isEqual(vTestNested.value, 1).forAttribute('value),
       validateWith.forAttribute('nest)
     )
-    println(resNest.errorView.get.prettyPrint)
+    //println(resNest.errorView.get.prettyPrint)
+  }
+
+  case class VTestSeq(value: Int, tests: Seq[VTest])
+
+  test("validate a seq") {
+    val vtest = VTest(1, "", None)
+    val vtest2 = VTest(2, "", Some("d"))
+    val vtseq = VTestSeq(1, Seq(vtest, vtest2))
+
+    val vtestValidator: DValidator[VTest] = DomainErrors.dvalidator[VTest] { value =>
+      value.validateWith(
+        isEqual(2, value.a) forAttribute 'a,
+        notEmpty(value.b) forAttribute 'b,
+        isSome(value.c) forAttribute 'c
+      )
+    }
+
+    val res = vtseq.validateWith(
+      isEqual(2, vtseq.value) forAttribute 'value
+    ).withValidations(
+      validSequence(vtseq.tests, vtestValidator) forAttribute 'tests
+    )
+
+    println(res.errorView.get.prettyPrint)
   }
 }

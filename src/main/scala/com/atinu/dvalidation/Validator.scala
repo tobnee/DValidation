@@ -20,11 +20,17 @@ object Validator {
   def ensure[T](s: T)(key: String, args: Any*)(v: T => Boolean): DValidation[T] =
     if (v(s)) s.success else new CustomValidationError(s, key, args.map(_.toString)).invalid
 
+  def validSequence[T](seq: Traversable[T], validator: DValidator[T]): IndexedSeq[DValidation[T]] = {
+    seq.toIndexedSeq.zipWithIndex.map { case (value, idx) =>
+      withPath(validator(value), s"[$idx]")
+    }
+  }
 }
 
 object DomainErrors {
 
   type DValidation[T] = Validation[DomainErrors, T]
+  type DValidator[T] = T => DValidation[T]
 
   def invalid[T](value: Any, key: String) = new CustomValidationError(value, key).invalid[T]
 
@@ -35,6 +41,23 @@ object DomainErrors {
   def validate[T](value: T)(cond: T => Boolean)(error: => DomainError): DValidation[T] =
     if(cond(value)) value.valid else error.invalid
 
+  def dvalidator[T](v: DValidator[T]):DValidator[T] = v
+
+  def doValidation[T](validations: Seq[DValidation[_]], value: T): DValidation[T] = {
+    val validValue = valid(value)
+    validateAll(validations, validValue)
+  }
+
+  def validateAll[T](validations: Seq[DValidation[_]], validValue: DValidation[T]): DValidation[T] = {
+    import syntax.semigroup._
+    validations.foldLeft(validValue) {
+      case (Success(_), Success(_)) => validValue
+      case (Success(_), e@Failure(_)) => e.asInstanceOf[DValidation[T]]
+      case (Failure(e1), Failure(e2)) => (e1 |+| e2).fail
+      case (e@Failure(_), Success(_)) => e.asInstanceOf[DValidation[T]]
+    }
+  }
+
   implicit class ErrorToErrors(val error: DomainError) extends AnyVal {
     def invalid[T] = new DomainErrors(NonEmptyList.apply(error)).fail[T]
   }
@@ -44,27 +67,36 @@ object DomainErrors {
   }
 
   implicit class tToValidation[T](val value: T) extends AnyVal {
-    import syntax.semigroup._
     def validateWith(validations: DValidation[_]*): DValidation[T] = {
-      val validValue = valid(value)
-      validations.foldLeft(validValue) {
-        case (Success(_), Success(_)) => validValue
-        case (Success(_), e @ Failure(_)) => e.asInstanceOf[DValidation[T]]
-        case (Failure(e1), Failure(e2)) => (e1 |+| e2).fail
-        case (e @Failure(_), Success(_)) => e.asInstanceOf[DValidation[T]]
-      }
+      doValidation(validations, value)
     }
   }
 
+  implicit class dSeqValidation[T](val value: IndexedSeq[DValidation[T]]) extends AnyVal {
+    def forAttribute(attr: Symbol): IndexedSeq[DValidation[T]] = {
+       value.map(validation => withPath(validation, attr.name))
+    }
+  }
+
+  def withPath[T](value: DValidation[T], path: String) = {
+    value.leftMap(domainErrors => domainErrors.copy(errors =
+      domainErrors.errors.map(e => e.nestPath(path))))
+  }
+
   implicit class dValFirstSuccess[T](val value: DValidation[T]) extends AnyVal {
+    import syntax.semigroup._
+
     def isValidOr[R <: T](next: => DValidation[R]) = value.findSuccess(next)
 
     def forAttribute(attr: Symbol): DValidation[T] = {
-      value.leftMap(domainErrors => domainErrors.copy(errors =
-        domainErrors.errors.map(e => e.nestPath(attr.name))))
+      val name = attr.name
+      withPath(value, name)
     }
 
     def errorView = value.fold(Option.apply, _ => None)
+
+    def withValidations(validations: IndexedSeq[DValidation[_]]) =
+      validateAll(validations.toSeq, value)
   }
 
   implicit def errorsSemiGroup: Semigroup[DomainErrors] =
