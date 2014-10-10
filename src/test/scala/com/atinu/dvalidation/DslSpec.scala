@@ -6,7 +6,6 @@ import org.scalatest.{Matchers, FunSuite}
 class DslSpec extends FunSuite with Matchers with ValidationMatcher {
 
   import Validator._
-  import DomainErrors._
 
   test("String is empty") {
     notEmpty("") should beInvalid
