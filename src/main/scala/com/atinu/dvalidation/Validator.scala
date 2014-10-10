@@ -51,11 +51,15 @@ object DomainErrors {
 
   def validateAll[T](validations: Seq[DValidation[_]], validValue: DValidation[T]): DValidation[T] = {
     import syntax.semigroup._
+
+    def failed(e:Failure[DomainErrors, _]): DValidation[T] =
+      e.asInstanceOf[DValidation[T]]
+
     validations.foldLeft(validValue) {
       case (Success(_), Success(_)) => validValue
-      case (Success(_), e@Failure(_)) => e.asInstanceOf[DValidation[T]]
+      case (Success(_), e@Failure(_)) => failed(e)
       case (Failure(e1), Failure(e2)) => (e1 |+| e2).fail
-      case (e@Failure(_), Success(_)) => e.asInstanceOf[DValidation[T]]
+      case (e@Failure(_), Success(_)) => failed(e)
     }
   }
 
