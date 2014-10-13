@@ -60,7 +60,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
     scala.util.Failure(exception).asValidation should beInvalidWithError(new IsTryFailureError(exception))
   }
 
-  def isEqual[T](valueExcept:T, valueCheck: T) =
+  def isEqual[T](valueCheck: T, valueExcept:T) =
     ensure(valueCheck)("error.dvalidation.isequal", valueExcept)( a => a == valueExcept)
 
   test("define a validation chain") {
@@ -146,14 +146,23 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       isSome(vtest.c) forAttribute 'c
     )
     //println(validateWith.errorView.get.prettyPrint)
-    validateWith should beInvalid
+    validateWith should beInvalidWithErrors(
+      new CustomValidationError(1, "error.dvalidation.isequal", Seq("2"), "/a"),
+      new IsEmptyStringError("/b"),
+      new IsNoneError("/c")
+    )
 
     val vTestNested = VTestNested(5, vtest)
     val resNest = vTestNested.validateWith(
       isEqual(vTestNested.value, 1).forAttribute('value),
       validateWith.forAttribute('nest)
     )
-    //println(resNest.errorView.get.prettyPrint)
+    resNest should beInvalidWithErrors(
+      new CustomValidationError(5, "error.dvalidation.isequal", Seq("1"), "/value"),
+      new CustomValidationError(1, "error.dvalidation.isequal", Seq("2"), "/nest/a"),
+      new IsEmptyStringError("/nest/b"),
+      new IsNoneError("/nest/c")
+    )
   }
 
   case class VTestSeq(value: Int, tests: Seq[VTest])
