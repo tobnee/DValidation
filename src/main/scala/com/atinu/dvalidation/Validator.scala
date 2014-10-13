@@ -83,7 +83,7 @@ object Validator {
     def errorView = value.fold(Option.apply, _ => None)
 
     def withValidations(validations: Seq[DValidation[_]]) =
-      validateAll(validations.toSeq, value)
+      validateAll(validations, value)
   }
 
   private[dvalidation] def withPath[T](value: DValidation[T], path: String) = {
@@ -148,6 +148,15 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String =
   private def argsString = if(args.isEmpty) "" else s", args: ${args.mkString(",")}"
 
   override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey$argsString)"""
+
+  override def equals(value: Any) = value match {
+    case v: AbstractDomainError if v.getClass == value.getClass =>
+      v.value == this.value &&
+      v.msgKey == this.msgKey &&
+      v.path == this.path &&
+      v.args == this.args
+    case _ => false
+  }
 }
 
 class IsEmptyStringError(value: String, path: String = "/") extends AbstractDomainError(value, "error.dvalidation.emptyString", path) {

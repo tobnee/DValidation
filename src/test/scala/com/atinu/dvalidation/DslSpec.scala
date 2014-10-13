@@ -8,32 +8,33 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   import Validator._
 
   test("String is empty") {
-    notEmpty("") should beInvalid
+    notEmpty("") should beInvalidWithError(new IsEmptyStringError(""))
   }
 
   test("String is not empty") {
-    notEmpty("s") should beValid
+    notEmpty("s") should beValidResult("s")
   }
 
   test("validate any value") {
-    ensure(1)("error.dvalidation.isequal", 1)(_ == 1) should beValid
+    ensure(1)("error.dvalidation.isequal", 1)(_ == 1) should beValidResult(1)
   }
 
   test("validate any value 2") {
-    ensure(1)("error.dvalidation.isequal", 2)( _ == 2) should beInvalid
+    ensure(1)("error.dvalidation.isequal", 2)( _ == 2) should beInvalidWithError(new
+        CustomValidationError(1, "error.dvalidation.isequal", Seq("2")))
   }
 
   test("List is empty") {
-    hasElements(List.empty[String]) should beInvalid
+    hasElements(List.empty[String]) should beInvalidWithError(new IsEmptySeqError(List.empty[String]))
   }
 
   test("List is not empty") {
     val a: DValidation[List[Int]] = hasElements(List(1,2))
-    a should beValid
+    a should beValidResult(List(1,2))
   }
 
   test("Option is empty") {
-    isSome(None.asInstanceOf[Option[String]]) should beInvalid
+    isSome(None.asInstanceOf[Option[String]]) should beInvalidWithError(new IsNoneError(None))
   }
 
   test("Option is not empty") {
@@ -174,6 +175,6 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       validSequence(vtseq.tests, vtestValidator) forAttribute 'tests
     )
 
-    println(res.errorView.get.prettyPrint)
+    //println(res.errorView.get.prettyPrint)
   }
 }
