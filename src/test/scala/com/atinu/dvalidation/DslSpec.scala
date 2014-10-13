@@ -25,7 +25,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("List is empty") {
-    hasElements(List.empty[String]) should beInvalidWithError(new IsEmptySeqError(List.empty[String]))
+    hasElements(List.empty[String]) should beInvalidWithError(new IsEmptySeqError())
   }
 
   test("List is not empty") {
@@ -34,7 +34,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("Option is empty") {
-    isSome(None.asInstanceOf[Option[String]]) should beInvalidWithError(new IsNoneError(None))
+    isSome(None.asInstanceOf[Option[String]]) should beInvalidWithError(new IsNoneError())
   }
 
   test("Option is not empty") {

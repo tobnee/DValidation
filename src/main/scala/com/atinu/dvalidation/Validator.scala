@@ -12,10 +12,10 @@ object Validator {
     if (s.isEmpty) new IsEmptyStringError(s).invalid else s.valid
 
   def hasElements[T <: Traversable[_]](s: T): DValidation[T] =
-    if (s.isEmpty) new IsEmptySeqError(s).invalid else s.valid
+    if (s.isEmpty) new IsEmptySeqError().invalid else s.valid
 
   def isSome[T <: Option[_]](s: T): DValidation[T] =
-    if (s.isEmpty) new IsNoneError(s).invalid else s.valid
+    if (s.isEmpty) new IsNoneError().invalid else s.valid
 
   def isTrySuccess[T <: Try[_]](s: T): DValidation[T] =
     s match {
@@ -163,14 +163,14 @@ class IsEmptyStringError(value: String, path: String = "/") extends AbstractDoma
    def copyWithPath(path: String): IsEmptyStringError = new IsEmptyStringError(value, path)
 }
 
-class IsEmptySeqError(value: Traversable[_], path: String = "/") extends AbstractDomainError(value, "error.dvalidation.emptySeq", path) {
+class IsEmptySeqError(path: String = "/") extends AbstractDomainError(Nil, "error.dvalidation.emptySeq", path) {
 
-   def copyWithPath(path: String): IsEmptySeqError = new IsEmptySeqError(value, path)
+   def copyWithPath(path: String): IsEmptySeqError = new IsEmptySeqError(path)
 }
 
-class IsNoneError(value: Option[_], path: String = "/") extends AbstractDomainError(value, "error.dvalidation.isNone", path) {
+class IsNoneError(path: String = "/") extends AbstractDomainError(None, "error.dvalidation.isNone", path) {
 
-   def copyWithPath(path: String): IsNoneError = new IsNoneError(value, path)
+   def copyWithPath(path: String): IsNoneError = new IsNoneError(path)
 }
 
 class IsTryFailureError(value: Throwable, path: String = "/") extends AbstractDomainError(value, "error.dvalidation.isTryFailue", path) {
