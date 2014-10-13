@@ -158,8 +158,8 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       validateWith.forAttribute('nest)
     )
     resNest should beInvalidWithErrors(
-      new CustomValidationError(5, "error.dvalidation.isequal", Seq("1"), "/value"),
-      new CustomValidationError(1, "error.dvalidation.isequal", Seq("2"), "/nest/a"),
+      CustomValidationError(5, "error.dvalidation.isequal", args = "1").nestPath("value"),
+      CustomValidationError(1, "error.dvalidation.isequal", args = "2").nestPath("nest/a"),
       new IsEmptyStringError("/nest/b"),
       new IsNoneError("/nest/c")
     )
