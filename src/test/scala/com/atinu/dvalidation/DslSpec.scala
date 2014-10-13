@@ -121,18 +121,19 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       ensure(vtest.a)("should be 1", 1)(_ == 1),
       notEmpty(vtest.b)
     )
-    res should beValid
-    res.toOption.get should equal(vtest)
+    res should beValidResult(vtest)
   }
 
   test("validate case class 2") {
     val vtest = VTest(1, "", Some("a"))
     val res = vtest.validateWith(
-      ensure(vtest.a)("should be 2", 2)(_ == 2),
+      ensure(vtest.a)("validation.equal", 2)(_ == 2),
       notEmpty(vtest.b)
     )
-    //println(res)
-    res should beInvalid
+    res should beInvalidWithErrors(
+      new CustomValidationError(1, "validation.equal", Seq("2")),
+      new IsEmptyStringError()
+    )
   }
 
   case class VTestNested(value: Int, nest: VTest)

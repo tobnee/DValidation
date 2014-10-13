@@ -42,6 +42,20 @@ trait ValidationMatcher {
     }
   }
 
+  class ValidationValuesIsFailureMatcher[T <: DomainError](values: Seq[T]) extends Matcher[DValidation[_]] {
+    override def apply(validation: DValidation[_]): MatchResult = {
+      if(values.isEmpty) fail("expected at least one expected error in test")
+      else {
+        val valuesList: NonEmptyList[T] = NonEmptyList.apply(values.head, values.tail:_*)
+        validation match {
+          case Success(v) => fail(s"expected (${values.mkString(",")}) got successful validation ($v)")
+          case Failure(e) if e == DomainErrors(valuesList) => succ("validation successful")
+          case Failure(e) => fail(s"Expected (${values.mkString(",")}) got $e")
+        }
+      }
+    }
+  }
+
   class ValidationIsInvalidMatcher extends Matcher[Validation[_, _]] {
     override def apply(validation: Validation[_, _]): MatchResult = {
       MatchResult(validation.isFailure,
@@ -58,5 +72,7 @@ trait ValidationMatcher {
   def beInvalid = new ValidationIsInvalidMatcher
 
   def beInvalidWithError[T <: DomainError](value: T) = new ValidationValueIsFailureMatcher(value)
+
+  def beInvalidWithErrors[T <: DomainError](values: T*) = new ValidationValuesIsFailureMatcher(values.toSeq)
 
 }

@@ -133,14 +133,15 @@ trait DomainError {
 abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String = "/", argsP: Seq[String] = Nil) extends DomainError {
   def value = valueP
   def msgKey = msgKeyP
-  def path = pathP
+  def path = if(pathP.isEmpty) "/" else pathP
   def args = argsP
 
   def copyWithPath(path: String): DomainError
 
   def nestPath(segment: String): DomainError = {
     val newPath =
-      if(path == "/") s"/$segment"
+      if(path.isEmpty) s"/$segment"
+      else if(path == "/") s"/$segment"
       else s"/$segment$path"
     copyWithPath(newPath)
   }
@@ -159,8 +160,8 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String =
   }
 }
 
-class IsEmptyStringError(value: String, path: String = "/") extends AbstractDomainError(value, "error.dvalidation.emptyString", path) {
-   def copyWithPath(path: String): IsEmptyStringError = new IsEmptyStringError(value, path)
+class IsEmptyStringError(path: String = "/") extends AbstractDomainError("", "error.dvalidation.emptyString", path) {
+   def copyWithPath(path: String): IsEmptyStringError = new IsEmptyStringError(path)
 }
 
 class IsEmptySeqError(path: String = "/") extends AbstractDomainError(Nil, "error.dvalidation.emptySeq", path) {
@@ -180,6 +181,6 @@ class IsTryFailureError(value: Throwable, path: String = "/") extends AbstractDo
 
 class CustomValidationError(value: Any, key: String, args: Seq[String] = Nil, path: String = "/") extends AbstractDomainError(value, key, path, args) {
 
-   def copyWithPath(path: String): CustomValidationError = new CustomValidationError(value, key, args, path)
+   def copyWithPath(lpath: String): CustomValidationError = new CustomValidationError(value, key, args, lpath)
 }
 
