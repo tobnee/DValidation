@@ -39,24 +39,25 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
 
   test("Option is not empty") {
     val a: DValidation[Option[Int]] = isSome(Some(1))
-    a should beValid
+    a should beValidResult(Some(1))
   }
 
   test("Option can be seen as valid validation") {
-    Some(1).asValidation should beValid
+    Some(1).asValidation should beValidResult(1)
   }
 
   test("Option can be seen as invalid validation") {
     val opt: Option[Int] = None
-    opt.asValidation should beInvalid
+    opt.asValidation should beInvalidWithError(new IsNoneError())
   }
 
   test("Try success can be seen as valid validation") {
-    scala.util.Success(1).asValidation should beValid
+    scala.util.Success(1).asValidation should beValidResult(1)
   }
 
   test("Try failure can be seen as invalid validation") {
-    scala.util.Failure(new IllegalArgumentException).asValidation should beInvalid
+    val exception = new IllegalArgumentException
+    scala.util.Failure(exception).asValidation should beInvalidWithError(new IsTryFailureError(exception))
   }
 
   def isEqual[T](valueExcept:T, valueCheck: T) =
