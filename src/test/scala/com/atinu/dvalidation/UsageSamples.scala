@@ -46,13 +46,12 @@ object UsageSamples extends App {
     ensure(i)(key = "error.dvalidation.stringinstrument", args = i.classification)(_.classification == StringInstrument)
   )
 
-  val a = max.validateWith(
+  max.validateWith(
     notEmpty(max.name) forAttribute 'name,
     ensure(max.age)("error.dvalidation.legalage", 18)(_ > 18) forAttribute 'age,
     hasElements(max.instruments) forAttribute 'instruments
   ).withValidations(
       validSequence(max.instruments, stringInstrumentValidator) forAttribute 'instruments
     )
-
   // => Failure(DomainError(path: /instruments/[0], value: Piano, msgKey: error.dvalidation.stringinstrument, args: Keyboard))
 }
