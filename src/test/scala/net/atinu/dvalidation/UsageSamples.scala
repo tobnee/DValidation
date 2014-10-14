@@ -1,7 +1,6 @@
-package com.atinu.dvalidation
+package net.atinu.dvalidation
 
-import com.atinu.dvalidation.Validator
-import com.atinu.dvalidation.Validator._
+import net.atinu.dvalidation.Validator._
 
 object UsageSamples extends App {
 

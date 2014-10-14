@@ -1,6 +1,6 @@
-package com.atinu.dvalidation
+package net.atinu.dvalidation
 
-import com.atinu.dvalidation.util.ValidationMatcher
+import net.atinu.dvalidation.util.ValidationMatcher
 import org.scalatest.{ Matchers, FunSuite }
 
 class DslSpec extends FunSuite with Matchers with ValidationMatcher {

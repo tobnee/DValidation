@@ -1,4 +1,4 @@
-package com.atinu
+package net.atinu
 
 import scalaz.Validation
 

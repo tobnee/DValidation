@@ -1,6 +1,6 @@
-package com.atinu.dvalidation.util
+package net.atinu.dvalidation.util
 
-import com.atinu.dvalidation.{ DomainErrors, DomainError, DValidation }
+import net.atinu.dvalidation.{ DomainErrors, DomainError, DValidation }
 import org.scalatest.matchers.{ MatchResult, Matcher }
 
 import scalaz._

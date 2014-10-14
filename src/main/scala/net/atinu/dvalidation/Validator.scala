@@ -1,4 +1,4 @@
-package com.atinu.dvalidation
+package net.atinu.dvalidation
 
 import scala.util.Try
 import scalaz._
