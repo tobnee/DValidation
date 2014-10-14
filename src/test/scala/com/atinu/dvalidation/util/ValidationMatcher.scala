@@ -8,6 +8,15 @@ import scalaz._
 object ValidationMatcher {
   def succ(msg: String) = MatchResult(true, "", msg)
   def fail(msg: String) = MatchResult(false, msg, "")
+
+  def matchValidations(validation: DValidation[_], expect: NonEmptyList[DomainError]): MatchResult = {
+    def errorDisplay = expect.list.mkString(",")
+    validation match {
+      case Success(v) => fail(s"expected ($errorDisplay) got successful validation ($v)")
+      case Failure(e) if e == DomainErrors(expect) => succ("validation successful")
+      case Failure(e) => fail(s"Expected ($errorDisplay) got $e")
+    }
+  }
 }
 
 trait ValidationMatcher {
@@ -34,11 +43,8 @@ trait ValidationMatcher {
 
   class ValidationValueIsFailureMatcher[T <: DomainError](value: T) extends Matcher[DValidation[_]] {
     override def apply(validation: DValidation[_]): MatchResult = {
-      validation match {
-        case Success(v) => fail(s"expected $value got successful validation ($v)")
-        case Failure(e) if e == DomainErrors(NonEmptyList(value)) => succ("validation successful")
-        case Failure(e) => fail(s"Expected $e got $value")
-      }
+      val valuesList: NonEmptyList[T] = NonEmptyList.apply(value)
+      matchValidations(validation, valuesList)
     }
   }
 
@@ -47,11 +53,7 @@ trait ValidationMatcher {
       if (values.isEmpty) fail("expected at least one expected error in test")
       else {
         val valuesList: NonEmptyList[T] = NonEmptyList.apply(values.head, values.tail: _*)
-        validation match {
-          case Success(v) => fail(s"expected (${values.mkString(",")}) got successful validation ($v)")
-          case Failure(e) if e == DomainErrors(valuesList) => succ("validation successful")
-          case Failure(e) => fail(s"Expected (${values.mkString(",")}) got $e")
-        }
+        matchValidations(validation, valuesList)
       }
     }
   }
