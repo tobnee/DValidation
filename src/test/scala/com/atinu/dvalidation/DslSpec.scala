@@ -1,7 +1,7 @@
 package com.atinu.dvalidation
 
 import com.atinu.dvalidation.util.ValidationMatcher
-import org.scalatest.{Matchers, FunSuite}
+import org.scalatest.{ Matchers, FunSuite }
 
 class DslSpec extends FunSuite with Matchers with ValidationMatcher {
 
@@ -20,8 +20,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("validate any value 2") {
-    ensure(1)("error.dvalidation.isequal", 2)( _ == 2) should beInvalidWithError(new
-        CustomValidationError(1, "error.dvalidation.isequal", Seq("2")))
+    ensure(1)("error.dvalidation.isequal", 2)(_ == 2) should beInvalidWithError(new CustomValidationError(1, "error.dvalidation.isequal", Seq("2")))
   }
 
   test("List is empty") {
@@ -29,8 +28,8 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("List is not empty") {
-    val a: DValidation[List[Int]] = hasElements(List(1,2))
-    a should beValidResult(List(1,2))
+    val a: DValidation[List[Int]] = hasElements(List(1, 2))
+    a should beValidResult(List(1, 2))
   }
 
   test("Option is empty") {
@@ -60,8 +59,8 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
     scala.util.Failure(exception).asValidation should beInvalidWithError(new IsTryFailureError(exception))
   }
 
-  def isEqual[T](valueCheck: T, valueExcept:T) =
-    ensure(valueCheck)("error.dvalidation.isequal", valueExcept)( a => a == valueExcept)
+  def isEqual[T](valueCheck: T, valueExcept: T) =
+    ensure(valueCheck)("error.dvalidation.isequal", valueExcept)(a => a == valueExcept)
 
   test("define a validation chain") {
     val a = 1
@@ -104,7 +103,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   }
 
   test("do a custom validation") {
-    val a = if("a" == "a") "a".valid else invalid("a", "error.notA")
+    val a = if ("a" == "a") "a".valid else invalid("a", "error.notA")
     a should beValid
   }
 
@@ -182,8 +181,8 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
     val res = vtseq.validateWith(
       isEqual(vtseq.value, 2) forAttribute 'value
     ).withValidations(
-      validSequence(vtseq.tests, vtestValidator) forAttribute 'tests
-    )
+        validSequence(vtseq.tests, vtestValidator) forAttribute 'tests
+      )
 
     res should beInvalidWithErrors(
       CustomValidationError(1, "error.dvalidation.isequal", args = "2").nestPath("value"),

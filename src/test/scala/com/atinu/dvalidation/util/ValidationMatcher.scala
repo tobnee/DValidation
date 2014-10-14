@@ -1,7 +1,7 @@
 package com.atinu.dvalidation.util
 
-import com.atinu.dvalidation.{DomainErrors, DomainError, DValidation}
-import org.scalatest.matchers.{MatchResult, Matcher}
+import com.atinu.dvalidation.{ DomainErrors, DomainError, DValidation }
+import org.scalatest.matchers.{ MatchResult, Matcher }
 
 import scalaz._
 
@@ -44,9 +44,9 @@ trait ValidationMatcher {
 
   class ValidationValuesIsFailureMatcher[T <: DomainError](values: Seq[T]) extends Matcher[DValidation[_]] {
     override def apply(validation: DValidation[_]): MatchResult = {
-      if(values.isEmpty) fail("expected at least one expected error in test")
+      if (values.isEmpty) fail("expected at least one expected error in test")
       else {
-        val valuesList: NonEmptyList[T] = NonEmptyList.apply(values.head, values.tail:_*)
+        val valuesList: NonEmptyList[T] = NonEmptyList.apply(values.head, values.tail: _*)
         validation match {
           case Success(v) => fail(s"expected (${values.mkString(",")}) got successful validation ($v)")
           case Failure(e) if e == DomainErrors(valuesList) => succ("validation successful")
