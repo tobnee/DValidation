@@ -139,10 +139,10 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String =
   def copyWithPath(path: String): DomainError
 
   def nestPath(segment: String): DomainError = {
-    val newPath =
-      if(path.isEmpty) s"/$segment"
-      else if(path == "/") s"/$segment"
-      else s"/$segment$path"
+    val newPath = path match {
+      case "" | "/" =>  s"/$segment"
+      case _ => s"/$segment$path"
+    }
     copyWithPath(newPath)
   }
 
