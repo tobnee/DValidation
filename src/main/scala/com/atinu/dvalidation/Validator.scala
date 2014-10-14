@@ -19,7 +19,7 @@ object Validator {
 
   def isTrySuccess[T <: Try[_]](s: T): DValidation[T] =
     s match {
-      case value:scala.util.Success[_] => s.success
+      case value: scala.util.Success[_] => s.success
       case scala.util.Failure(e) => new IsTryFailureError(e).invalid
     }
 
@@ -27,15 +27,16 @@ object Validator {
     if (v(s)) s.success else new CustomValidationError(s, key, args.map(_.toString)).invalid
 
   def validSequence[T](seq: Traversable[T], validator: DValidator[T]): IndexedSeq[DValidation[T]] = {
-    seq.toIndexedSeq.zipWithIndex.map { case (value, idx) =>
-      withPath(validator(value), s"[$idx]")
+    seq.toIndexedSeq.zipWithIndex.map {
+      case (value, idx) =>
+        withPath(validator(value), s"[$idx]")
     }
   }
 
   def validate[T](value: T)(cond: T => Boolean)(error: => DomainError): DValidation[T] =
-    if(cond(value)) value.valid else error.invalid
+    if (cond(value)) value.valid else error.invalid
 
-  def template[T](v: DValidator[T]):DValidator[T] = v
+  def template[T](v: DValidator[T]): DValidator[T] = v
 
   def invalid[T](value: Any, key: String) = new CustomValidationError(value, key).invalid[T]
 
@@ -98,14 +99,14 @@ object Validator {
 
   private[dvalidation] def validateAll[T](validations: Seq[DValidation[_]], validValue: DValidation[T]): DValidation[T] = {
 
-    def failed(e:Failure[DomainErrors, _]): DValidation[T] =
+    def failed(e: Failure[DomainErrors, _]): DValidation[T] =
       e.asInstanceOf[DValidation[T]]
 
     validations.foldLeft(validValue) {
       case (Success(_), Success(_)) => validValue
-      case (Success(_), e@Failure(_)) => failed(e)
+      case (Success(_), e @ Failure(_)) => failed(e)
       case (Failure(e1), Failure(e2)) => (e1 |+| e2).fail
-      case (e@Failure(_), Success(_)) => failed(e)
+      case (e @ Failure(_), Success(_)) => failed(e)
     }
   }
 
@@ -133,29 +134,29 @@ trait DomainError {
 abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String = "/", argsP: Seq[String] = Nil) extends DomainError {
   def value = valueP
   def msgKey = msgKeyP
-  def path = if(pathP.isEmpty) "/" else pathP
+  def path = if (pathP.isEmpty) "/" else pathP
   def args = argsP
 
   def copyWithPath(path: String): DomainError
 
   def nestPath(segment: String): DomainError = {
     val newPath = path match {
-      case "" | "/" =>  s"/$segment"
+      case "" | "/" => s"/$segment"
       case _ => s"/$segment$path"
     }
     copyWithPath(newPath)
   }
 
-  private def argsString = if(args.isEmpty) "" else s", args: ${args.mkString(",")}"
+  private def argsString = if (args.isEmpty) "" else s", args: ${args.mkString(",")}"
 
   override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey$argsString)"""
 
   override def equals(value: Any) = value match {
     case v: AbstractDomainError if v.getClass == this.getClass =>
       v.value == this.value &&
-      v.msgKey == this.msgKey &&
-      v.path == this.path &&
-      v.args == this.args
+        v.msgKey == this.msgKey &&
+        v.path == this.path &&
+        v.args == this.args
     case _ => false
   }
 
@@ -164,17 +165,17 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: String =
 }
 
 class IsEmptyStringError(path: String = "/") extends AbstractDomainError("", "error.dvalidation.emptyString", path) {
-   def copyWithPath(path: String) = new IsEmptyStringError(path)
+  def copyWithPath(path: String) = new IsEmptyStringError(path)
 }
 
 class IsEmptySeqError(path: String = "/") extends AbstractDomainError(Nil, "error.dvalidation.emptySeq", path) {
 
-   def copyWithPath(path: String) = new IsEmptySeqError(path)
+  def copyWithPath(path: String) = new IsEmptySeqError(path)
 }
 
 class IsNoneError(path: String = "/") extends AbstractDomainError(None, "error.dvalidation.isNone", path) {
 
-   def copyWithPath(path: String) = new IsNoneError(path)
+  def copyWithPath(path: String) = new IsNoneError(path)
 }
 
 class IsTryFailureError(value: Throwable, path: String = "/") extends AbstractDomainError(value, "error.dvalidation.isTryFailue", path) {
@@ -188,6 +189,6 @@ object CustomValidationError {
 
 class CustomValidationError(value: Any, key: String, args: Seq[String] = Nil, path: String = "/") extends AbstractDomainError(value, key, path, args) {
 
-   def copyWithPath(path: String) = new CustomValidationError(value, key, args, path)
+  def copyWithPath(path: String) = new CustomValidationError(value, key, args, path)
 }
 
