@@ -145,7 +145,6 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
       notEmpty(vtest.b) forAttribute 'b,
       isSome(vtest.c) forAttribute 'c
     )
-    //println(validateWith.errorView.get.prettyPrint)
     validateWith should beInvalidWithErrors(
       new CustomValidationError(1, "error.dvalidation.isequal", Seq("2"), "/a"),
       new IsEmptyStringError("/b"),
@@ -174,18 +173,24 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
 
     val vtestValidator: DValidator[VTest] = Validator.template[VTest] { value =>
       value.validateWith(
-        isEqual(2, value.a) forAttribute 'a,
+        isEqual(value.a, 2) forAttribute 'a,
         notEmpty(value.b) forAttribute 'b,
         isSome(value.c) forAttribute 'c
       )
     }
 
     val res = vtseq.validateWith(
-      isEqual(2, vtseq.value) forAttribute 'value
+      isEqual(vtseq.value, 2) forAttribute 'value
     ).withValidations(
       validSequence(vtseq.tests, vtestValidator) forAttribute 'tests
     )
 
-    //println(res.errorView.get.prettyPrint)
+    res should beInvalidWithErrors(
+      CustomValidationError(1, "error.dvalidation.isequal", args = "2").nestPath("value"),
+      CustomValidationError(1, "error.dvalidation.isequal", args = "2").nestPath("tests/[0]/a"),
+      new IsEmptyStringError("/tests/[0]/b"),
+      new IsNoneError("/tests/[0]/c"),
+      new IsEmptyStringError("/tests/[1]/b")
+    )
   }
 }
