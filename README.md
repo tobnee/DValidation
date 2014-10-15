@@ -1,5 +1,7 @@
-# DValidation - Scala Domain Validation Toolkit
+# DValidation
 A little, opinionated domain object validation toolkit on top of [scalaz](https://github.com/scalaz/scalaz)
+
+!["Build Status"](https://travis-ci.org/tobnee/DValidation.svg?branch=master)
 
 ## Basic Usage
 Lets start with this simple domain model: 
