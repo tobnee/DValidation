@@ -8,7 +8,7 @@ class DslSpec extends FunSuite with Matchers with ValidationMatcher {
   import Validator._
 
   test("String is empty") {
-    notEmpty("") should beInvalidWithError(new IsEmptyStringError(""))
+    notEmpty("") should beInvalidWithError(new IsEmptyStringError())
   }
 
   test("String is not empty") {
