@@ -24,7 +24,6 @@ the predefined combinators:
 val mikael = Musician("Mikael Åkerfeldt", 40, List(Guitar, BassGuitar))
 val martin = Musician("Martin Mendez", 17, List(BassGuitar))
 
-
 val res: DValidation[Musician] = mikael.validateWith(
   notEmpty(mikael.name) forAttribute 'name,
   ensure(mikael.age)("error.dvalidation.legalage", 18)(_ > 18) forAttribute 'age,
