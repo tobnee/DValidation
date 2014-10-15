@@ -3,7 +3,7 @@ package net.atinu.dvalidation
 import net.atinu.dvalidation.util.ValidationMatcher
 import org.scalatest.{ Matchers, FunSuite }
 
-class DslSpec extends FunSuite with Matchers with ValidationMatcher {
+class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
 
   import Validator._
 
