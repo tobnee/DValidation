@@ -105,4 +105,3 @@ can build language specific error messages, which can be represented to users.
 
 The library packages some predefined type of DomainErrors like *IsEmptySeqError* which already
 chooses appropriate value and msgKey values.
-
