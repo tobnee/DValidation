@@ -17,6 +17,7 @@ object UsageSamples extends App {
 
   // Ad-Hoc validation for a case class
   val mikael = Musician("Mikael Åkerfeldt", 40, List(Guitar, BassGuitar))
+  val martin = Musician("Martin Mendez", 17, List(BassGuitar))
 
   val res: DValidation[Musician] = mikael.validateWith(
     notEmpty(mikael.name) forAttribute 'name,
@@ -35,7 +36,7 @@ object UsageSamples extends App {
   }
   musicianValidator(mikael)
   // => Success(User(Mikael Åkerfeldt,40))
-  musicianValidator(Musician("Martin Mendez", 17, List(BassGuitar)))
+  musicianValidator(martin)
   // => Failure(DomainError(path: /age, value: 17, msgKey: error.dvalidation.legalage, args: 18))
 
   // Sequence Validation
