@@ -1,5 +1,6 @@
 package net.atinu.dvalidation
 
+import scala.reflect.ClassTag
 import scala.util.Try
 import scalaz._
 import scalaz.NonEmptyList._
@@ -119,7 +120,27 @@ object Validator {
     }
 }
 
+object DomainErrors {
+  def withSingleError(error: DomainError) = DomainErrors(NonEmptyList.apply(error))
+
+  def withErrors(errors: DomainError*) =
+    if (errors.isEmpty) throw new IllegalArgumentException("DomainErrors depend on at least one DomainError")
+    else DomainErrors(NonEmptyList(errors.head, errors.tail: _*))
+}
+
 case class DomainErrors(errors: NonEmptyList[DomainError]) {
+
+  def asList: List[DomainError] = errors.list
+
+  def firstError: DomainError = errors.head
+
+  def errorsOfType[T <: DomainError](implicit ct: ClassTag[T]): List[T] = {
+    errors.list.filter(error => {
+      val runtimeClass = ct.runtimeClass
+      runtimeClass.isInstance(error)
+    }).asInstanceOf[List[T]]
+  }
+
   override def toString = errors.list.mkString(",")
   def prettyPrint = errors.list.mkString("-->\n", "\n", "\n<--")
 }

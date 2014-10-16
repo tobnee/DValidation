@@ -192,4 +192,12 @@ class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
       new IsEmptyStringError("/tests/[1]/b")
     )
   }
+
+  test("DomainErrors can be filtered by type") {
+    DomainErrors.withErrors(
+      new IsEmptyStringError("/tests/[0]/b"),
+      new IsNoneError("/tests/[0]/c"),
+      new IsEmptyStringError("/tests/[1]/b")
+    ).errorsOfType[IsNoneError] should contain(new IsNoneError("/tests/[0]/c"))
+  }
 }
