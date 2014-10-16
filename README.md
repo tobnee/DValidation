@@ -64,9 +64,9 @@ musicianValidator(martin)
 ## Sequence Validation
 A common issue when validating business objects is the validation of sequences since errors
 are either global or have to be mapped to a specific element. In the example the 
-*hasElements* combinator is used to define a global validation rule. *validSequence* is
+`hasElements` combinator is used to define a global validation rule. `validSequence` is
 a combinator which applies a given validation to all elements of a sequence. The 
-*withValidations* combinator will include the resulting sequence of *DValidations* in the
+`withValidations` combinator will include the resulting sequence of `DValidations` in the
 parent validation context. 
 
 ```scala
@@ -86,23 +86,36 @@ max.validateWith(
   validSequence(max.instruments, stringInstrumentValidator) forAttribute 'instruments
 )
 ```
+
+This validation will result in one `DomainError` with a path indicating the position in 
+the sequence.
+
 ```scala
 Failure(DomainError(path: /instruments/[0], value: Piano, msgKey: error.dvalidation.stringinstrument, args: Keyboard))
 ```
 
-## DValidation Basics
-A *DValidation* is defined as follows:
+# Define Custom Validators
+The ensure combinator offers a simple approach how to define a custom validator.
+
+```scala
+ def isEqual[T](valueCheck: T, valueExcept: T): DValidation[T] =
+    ensure(valueCheck)("error.dvalidation.isequal", valueExcept)(a => a == valueExcept)
+``` 
+
+## DValidation Internals 
+A `DValidation` and `DValidator` are defined as follows:
 
 ```scala
 type DValidation[T] = scalaz.Validation[DomainErrors, T]
+type DValidator[T] = T => DValidation[T]
 ```
 
-In other words, in the failure case of a *scalaz.Valdation* the *DomainErrors* type is used,
+In other words, in the failure case of a `scalaz.Valdation` the `DomainErrors` type is used,
 which itself is a list of at least one DomainError. This type has attributes which
-allow clients to handle errors appropriately. The *path* attribute helps to map an error to
-the domain object which is responsible for the error. The *value* attribute will return the
-value of the validated attribute. Together with the *msgKey* and *args* attributes clients 
+allow clients to handle errors appropriately. The `path` attribute helps to map an error to
+the domain object which is responsible for the error. The `value` attribute will return the
+value of the validated attribute. Together with the `msgKey` and `args` attributes clients 
 can build language specific error messages, which can be represented to users.
 
-The library packages some predefined type of DomainErrors like *IsEmptySeqError* which already
+The library packages some predefined type of DomainErrors like `IsEmptySeqError` which already
 chooses appropriate value and msgKey values.
