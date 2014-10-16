@@ -135,10 +135,8 @@ case class DomainErrors(errors: NonEmptyList[DomainError]) {
   def firstError: DomainError = errors.head
 
   def errorsOfType[T <: DomainError](implicit ct: ClassTag[T]): List[T] = {
-    errors.list.filter(error => {
-      val runtimeClass = ct.runtimeClass
-      runtimeClass.isInstance(error)
-    }).asInstanceOf[List[T]]
+    val runtimeClass = ct.runtimeClass
+    errors.list.filter(error => runtimeClass.isInstance(error)).asInstanceOf[List[T]]
   }
 
   override def toString = errors.list.mkString(",")
