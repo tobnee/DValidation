@@ -94,7 +94,7 @@ the sequence.
 Failure(DomainError(path: /instruments/[0], value: Piano, msgKey: error.dvalidation.stringinstrument, args: Keyboard))
 ```
 
-# Define Custom Validators
+## Define Custom Validators
 The ensure combinator offers a simple approach how to define a custom validator.
 
 ```scala
