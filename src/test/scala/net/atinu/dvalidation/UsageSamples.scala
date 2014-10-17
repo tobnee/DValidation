@@ -5,12 +5,17 @@ import net.atinu.dvalidation.Validator._
 object UsageSamples extends App {
 
   trait Classification
+
   case object StringInstrument extends Classification
+
   case object Keyboard extends Classification
 
   abstract class Instrument(val classification: Classification)
+
   case object BassGuitar extends Instrument(StringInstrument)
+
   case object Guitar extends Instrument(StringInstrument)
+
   case object Piano extends Instrument(Keyboard)
 
   case class Musician(name: String, age: Int, instruments: Seq[Instrument])
@@ -54,4 +59,17 @@ object UsageSamples extends App {
       validSequence(max.instruments, stringInstrumentValidator) forAttribute 'instruments
     )
   // => Failure(DomainError(path: /instruments/[0], value: Piano, msgKey: error.dvalidation.stringinstrument, args: Keyboard))
+
+  // applicative validation
+  val musicianValidatorApplicative: DValidator[Musician] = Validator.template[Musician] { musician =>
+    import scalaz.Scalaz._
+
+    val stringInstrument = validSequence(musician.instruments, stringInstrumentValidator).collapse
+    val atLeastOneString = stringInstrument.flatMap(value => hasElements(value))
+    val legalAge = ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18)
+
+    ((notEmpty(musician.name) forAttribute 'name) |@|
+      (legalAge forAttribute 'age) |@|
+      (atLeastOneString forAttribute 'instruments))(Musician.apply)
+  }
 }

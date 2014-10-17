@@ -102,6 +102,27 @@ The ensure combinator offers a simple approach how to define a custom validator.
     ensure(valueCheck)("error.dvalidation.isequal", valueExcept)(a => a == valueExcept)
 ``` 
 
+## Use Applicative Validation
+*scalaz Validation* offers an applicative validation style with which validations can be composed
+and mapped to a larger validation. In this aspect the applicative validation is similar to the
+common validation style of DValidation, with the difference that the mapping from element validations
+to a bigger validation is done explicitly via a mapping function. Because of this the applicative
+validation style is potentially more type safe, if the `apply` function of a case class is used. The cost
+of this style is the fixed structure of the expected validations, which can lead to more complicated
+validation code.  
+
+```scala
+val musicianValidatorApplicative = Validator.template[Musician] { musician =>
+  val stringInstrument = validSequence(musician.instruments, stringInstrumentValidator).collapse
+  val atLeastOneString = stringInstrument.flatMap(value => hasElements(value))
+  val hasLegalAge = ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18)
+
+  ((notEmpty(musician.name) forAttribute 'name) |@|
+   (hasLegalAge forAttribute 'age) |@|
+   (atLeastOneString forAttribute 'instruments))(Musician.apply)
+}
+```
+
 ## DValidation Internals 
 A `DValidation` and `DValidator` are defined as follows:
 

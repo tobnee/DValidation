@@ -70,8 +70,14 @@ object Validator {
   }
 
   implicit class dSeqValidation[T](val value: IndexedSeq[DValidation[T]]) extends AnyVal {
+
     def forAttribute(attr: Symbol): IndexedSeq[DValidation[T]] = {
       value.map(validation => nestPathOnError(validation, _.nestAttribute(attr)))
+    }
+
+    def collapse = {
+      val valid = value.flatMap(v => v.toOption).valid
+      validateAll(value, valid)
     }
   }
 
@@ -210,7 +216,7 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathStri
 
   private def argsString = if (args.isEmpty) "" else s", args: ${args.mkString(",")}"
 
-  override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey$argsString)"""
+  override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey, args: $argsString)"""
 
   override def equals(value: Any) = value match {
     case v: AbstractDomainError if v.getClass == this.getClass =>
