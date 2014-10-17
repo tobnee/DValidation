@@ -6,6 +6,7 @@ import org.scalatest.{ Matchers, FunSuite }
 class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
 
   import Validator._
+  import Path._
 
   test("String is empty") {
     notEmpty("") should beInvalidWithError(new IsEmptyStringError())
@@ -145,9 +146,9 @@ class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
       isSome(vtest.c) forAttribute 'c
     )
     validateWith should beInvalidWithErrors(
-      new CustomValidationError(1, "error.dvalidation.isequal", Seq("2"), "/a"),
-      new IsEmptyStringError("/b"),
-      new IsNoneError("/c")
+      new CustomValidationError(1, "error.dvalidation.isequal", Seq("2"), "/a".asPath),
+      new IsEmptyStringError("/b".asPath),
+      new IsNoneError("/c".asPath)
     )
 
     val vTestNested = VTestNested(5, vtest)
@@ -156,10 +157,12 @@ class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
       validateWith.forAttribute('nest)
     )
     resNest should beInvalidWithErrors(
-      CustomValidationError(5, "error.dvalidation.isequal", args = "1").nestPath("value"),
-      CustomValidationError(1, "error.dvalidation.isequal", args = "2").nestPath("nest/a"),
-      new IsEmptyStringError("/nest/b"),
-      new IsNoneError("/nest/c")
+      CustomValidationError(5, "error.dvalidation.isequal", args = "1")
+        .nestAttribute('value),
+      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
+        .nestAttribute('a).nestAttribute('nest),
+      new IsEmptyStringError("/nest/b".asPath),
+      new IsNoneError("/nest/c".asPath)
     )
   }
 
@@ -185,19 +188,36 @@ class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
       )
 
     res should beInvalidWithErrors(
-      CustomValidationError(1, "error.dvalidation.isequal", args = "2").nestPath("value"),
-      CustomValidationError(1, "error.dvalidation.isequal", args = "2").nestPath("tests/[0]/a"),
-      new IsEmptyStringError("/tests/[0]/b"),
-      new IsNoneError("/tests/[0]/c"),
-      new IsEmptyStringError("/tests/[1]/b")
+      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
+        .nestAttribute('value),
+      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
+        .nest("/tests/[0]/a".asPath),
+      new IsEmptyStringError("/tests/[0]/b".asPath),
+      new IsNoneError("/tests/[0]/c".asPath),
+      new IsEmptyStringError("/tests/[1]/b".asPath)
     )
   }
 
   test("DomainErrors can be filtered by type") {
     DomainErrors.withErrors(
-      new IsEmptyStringError("/tests/[0]/b"),
-      new IsNoneError("/tests/[0]/c"),
-      new IsEmptyStringError("/tests/[1]/b")
-    ).errorsOfType[IsNoneError] should contain(new IsNoneError("/tests/[0]/c"))
+      new IsEmptyStringError("/tests/[0]/b".asPath),
+      new IsNoneError("/tests/[0]/c".asPath),
+      new IsEmptyStringError("/tests/[1]/b".asPath)
+    ).errorsOfType[IsNoneError] should contain(new IsNoneError("/tests/[0]/c".asPath))
+  }
+
+  test("validate paths") {
+    Path.isValidPath("") should be(false)
+    Path.isValidPath("/sd/") should be(false)
+    Path.isValidPath("/") should be(true)
+    Path.isValidPath("/tests/[1]/b") should be(true)
+    Path.isValidPath("/tests") should be(true)
+  }
+
+  test("build paths") {
+    val vtest = VTest(1, "", None)
+    vtest.validateWith(isEqual(vtest.a, 2) forAttribute 'a forAttribute 'b) should beInvalidWithError(
+      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
+        .nestAttribute('a).nestAttribute('b))
   }
 }
