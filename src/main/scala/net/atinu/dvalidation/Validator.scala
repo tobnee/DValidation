@@ -166,15 +166,15 @@ object Path {
 
   private lazy val r = """(/{1}+)|((/{1}+)([^/]+/{1}+|[^/]+)*?[^/]+)""".r.pattern
 
-  def isValidPath(a: String): Boolean = r.matcher(a).matches()
+  def isValidPath(path: String): Boolean = r.matcher(path).matches()
 
-  def wrap(a: String): PathString =
-    if (isValidPath(a)) wrapInternal(a)
-    else throw new IllegalArgumentException(s"$a is not a valid path")
+  def wrap(path: String): PathString =
+    if (isValidPath(path)) wrapInternal(path)
+    else throw new IllegalArgumentException(s"$path is not a valid path")
 
-  private[dvalidation] def wrapInternal(a: String): @@[String, Path] = Tag[String, Path](a)
+  private[dvalidation] def wrapInternal(path: String): PathString = Tag[String, Path](path)
 
-  def unwrap(a: PathString): String = Tag.unsubst[String, Id, Path](a)
+  def unwrap(path: PathString): String = Tag.unsubst[String, Id, Path](path)
 }
 
 trait DomainError {
