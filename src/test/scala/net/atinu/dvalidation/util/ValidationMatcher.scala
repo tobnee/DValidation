@@ -13,7 +13,7 @@ object ValidationMatcher {
     def errorDisplay = expect.list.mkString(",")
     validation match {
       case Success(v) => fail(s"expected ($errorDisplay) got successful validation ($v)")
-      case Failure(e) if e == DomainErrors(expect) => succ("validation successful")
+      case Failure(e) if e == DomainErrors.fromNel(expect) => succ("validation successful")
       case Failure(e) => fail(s"Expected ($errorDisplay) got $e")
     }
   }

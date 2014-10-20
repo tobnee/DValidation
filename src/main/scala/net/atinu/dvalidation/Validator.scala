@@ -52,7 +52,7 @@ object Validator {
   def valid[T](value: T): DValidation[T] = value.valid
 
   implicit class ErrorToFailure(val error: DomainError) extends AnyVal {
-    def invalid[T] = new DomainErrors(NonEmptyList.apply(error)).fail[T]
+    def invalid[T] = DomainErrors.withSingleError(error).fail[T]
   }
 
   implicit class tToSuccess[T](val value: T) extends AnyVal {
@@ -102,8 +102,7 @@ object Validator {
   }
 
   private[dvalidation] def nestPathOnError[T](value: DValidation[T], nestPathTransform: DomainError => DomainError) = {
-    value.leftMap(domainErrors => domainErrors.copy(errors =
-      domainErrors.errors.map(error => nestPathTransform(error))))
+    value.leftMap(domainErrors => domainErrors.map(error => nestPathTransform(error)))
   }
 
   private[dvalidation] def applyValidations[T](validations: Seq[DValidation[_]], value: T): DValidation[T] = {
@@ -128,20 +127,30 @@ object Validator {
     new Semigroup[DomainErrors] {
       def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {
         val errors = Semigroup[NonEmptyList[DomainError]].append(f1.errors, f2.errors)
-        new DomainErrors(errors)
+        DomainErrors.fromNel(errors)
       }
     }
 }
 
 object DomainErrors {
-  def withSingleError(error: DomainError) = DomainErrors(NonEmptyList.apply(error))
+
+  def apply[A <: DomainError](h: A, t: A*) = new DomainErrors(NonEmptyList(h, t: _*))
+
+  def withSingleError(error: DomainError) = new DomainErrors(NonEmptyList.apply(error))
 
   def withErrors(errors: DomainError*) =
     if (errors.isEmpty) throw new IllegalArgumentException("DomainErrors depend on at least one DomainError")
-    else DomainErrors(NonEmptyList(errors.head, errors.tail: _*))
+    else DomainErrors(errors.head, errors.tail: _*)
+
+  def fromNel[T <: DomainError](nel: NonEmptyList[T]): DomainErrors = new DomainErrors(nel)
+
+  def unapplySeq[A](e: DomainErrors): Option[(DomainError, List[DomainError])] =
+    NonEmptyList.unapplySeq(e.errors)
 }
 
-case class DomainErrors(errors: NonEmptyList[DomainError]) {
+final class DomainErrors private (e: NonEmptyList[DomainError]) {
+
+  def errors: NonEmptyList[DomainError] = e
 
   def asList: List[DomainError] = errors.list
 
@@ -152,7 +161,18 @@ case class DomainErrors(errors: NonEmptyList[DomainError]) {
     errors.list.filter(error => runtimeClass.isInstance(error)).asInstanceOf[List[T]]
   }
 
+  def map(t: DomainError => DomainError) = new DomainErrors(errors.map(t))
+
   override def toString = errors.list.mkString(",")
+
+  override def equals(value: Any) = value match {
+    case v: DomainErrors =>
+      this.errors == v.errors
+    case _ => false
+  }
+
+  override def hashCode(): Int = errors.hashCode()
+
   def prettyPrint = errors.list.mkString("-->\n", "\n", "\n<--")
 }
 

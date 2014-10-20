@@ -142,4 +142,16 @@ class DValidationSpec extends ValidationSuite {
     ).errorsOfType[IsNoneError] should contain(new IsNoneError("/tests/[0]/c".asPath))
   }
 
+  test("has a sequence extractor API") {
+    val e = DomainErrors.withErrors(
+      new IsEmptyStringError("/tests/[0]/b".asPath),
+      new IsNoneError("/tests/[0]/c".asPath),
+      new IsEmptyStringError("/tests/[1]/b".asPath)
+    )
+    val a = e match {
+      case DomainErrors(e1, as @ _*) => e1
+    }
+    a should equal(new IsEmptyStringError("/tests/[0]/b".asPath))
+  }
+
 }
