@@ -1,12 +1,11 @@
 package net.atinu.dvalidation
 
-import net.atinu.dvalidation.util.ValidationMatcher
-import org.scalatest.{ Matchers, FunSuite }
+import net.atinu.dvalidation.util.ValidationSuite
 
-class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
+class DValidationSpec extends ValidationSuite {
 
-  import Validator._
-  import Path._
+  import net.atinu.dvalidation.Path._
+  import net.atinu.dvalidation.Validator._
 
   test("String is empty") {
     notEmpty("") should beInvalidWithError(new IsEmptyStringError())
@@ -40,24 +39,6 @@ class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
   test("Option is not empty") {
     val a: DValidation[Option[Int]] = isSome(Some(1))
     a should beValidResult(Some(1))
-  }
-
-  test("Option can be seen as valid validation") {
-    Some(1).asValidation should beValidResult(1)
-  }
-
-  test("Option can be seen as invalid validation") {
-    val opt: Option[Int] = None
-    opt.asValidation should beInvalidWithError(new IsNoneError())
-  }
-
-  test("Try success can be seen as valid validation") {
-    scala.util.Success(1).asValidation should beValidResult(1)
-  }
-
-  test("Try failure can be seen as invalid validation") {
-    val exception = new IllegalArgumentException
-    scala.util.Failure(exception).asValidation should beInvalidWithError(new IsTryFailureError(exception))
   }
 
   def isEqual[T](valueCheck: T, valueExcept: T) =
@@ -206,18 +187,4 @@ class DValidationSpec extends FunSuite with Matchers with ValidationMatcher {
     ).errorsOfType[IsNoneError] should contain(new IsNoneError("/tests/[0]/c".asPath))
   }
 
-  test("validate paths") {
-    Path.isValidPath("") should be(false)
-    Path.isValidPath("/sd/") should be(false)
-    Path.isValidPath("/") should be(true)
-    Path.isValidPath("/tests/[1]/b") should be(true)
-    Path.isValidPath("/tests") should be(true)
-  }
-
-  test("build paths") {
-    val vtest = VTest(1, "", None)
-    vtest.validateWith(isEqual(vtest.a, 2) forAttribute 'a forAttribute 'b) should beInvalidWithError(
-      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
-        .nestAttribute('a).nestAttribute('b))
-  }
 }
