@@ -123,6 +123,25 @@ val musicianValidatorApplicative = Validator.template[Musician] { musician =>
 }
 ```
 
+## Standard Library Conversions
+DValidation offers conversions between Scala standard library types and DValidation. 
+
+```scala
+Some(1).asValidation
+// => Success(1)
+
+val opt: Option[Int] = None
+opt.asValidation
+// => Failure(DomainError(path: /, value: None, msgKey: error.dvalidation.isNone))
+
+scala.util.Success(1).asValidation
+// => Success(1)
+
+val exception = new IllegalArgumentException
+scala.util.Failure(exception).asValidation
+// => Failure(DomainError(path: /, value: java.lang.IllegalArgumentException, msgKey: error.dvalidation.isTryFailue))
+```
+
 ## DValidation Internals 
 A `DValidation` and `DValidator` are defined as follows:
 

@@ -51,7 +51,7 @@ object Validator {
 
   def valid[T](value: T): DValidation[T] = value.valid
 
-  implicit class ErrorToErrors(val error: DomainError) extends AnyVal {
+  implicit class ErrorToFailure(val error: DomainError) extends AnyVal {
     def invalid[T] = new DomainErrors(NonEmptyList.apply(error)).fail[T]
   }
 
@@ -71,6 +71,10 @@ object Validator {
 
   implicit class optToValidation[T](val value: Option[T]) extends AnyVal {
     def asValidation: DValidation[T] = isSome(value).map(_.get)
+  }
+
+  implicit class dvalidationToValidationNel[T](val value: DValidation[T]) extends AnyVal {
+    def asValidationNel: ValidationNel[DomainError, T] = value.leftMap(_.errors)
   }
 
   implicit class dSeqValidation[T](val value: IndexedSeq[DValidation[T]]) extends AnyVal {
@@ -218,7 +222,7 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathStri
 
   private def argsString = if (args.isEmpty) "" else s", args: ${args.mkString(",")}"
 
-  override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey, args: $argsString)"""
+  override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey$argsString)"""
 
   override def equals(value: Any) = value match {
     case v: AbstractDomainError if v.getClass == this.getClass =>

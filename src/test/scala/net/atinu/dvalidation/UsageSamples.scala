@@ -72,4 +72,20 @@ object UsageSamples extends App {
       (legalAge forAttribute 'age) |@|
       (atLeastOneString forAttribute 'instruments))(Musician.apply)
   }
+
+  // Standard Library Conversion
+  Some(1).asValidation
+  // => Success(1)
+
+  val opt: Option[Int] = None
+  opt.asValidation
+  // => Failure(DomainError(path: /, value: None, msgKey: error.dvalidation.isNone, args: ))
+
+  scala.util.Success(1).asValidation
+  // => Success(1)
+
+  val exception = new IllegalArgumentException
+  println(scala.util.Failure(exception).asValidation)
+  // => Failure(DomainError(path: /, value: java.lang.IllegalArgumentException, msgKey: error.dvalidation.isTryFailue, args: ))
+
 }
