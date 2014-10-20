@@ -87,8 +87,6 @@ object Validator {
 
   implicit class dValFirstSuccess[T](val value: DValidation[T]) extends AnyVal {
 
-    def isValidOr[R <: T](next: => DValidation[R]) = value.findSuccess(next)
-
     def forAttribute(attr: Symbol): DValidation[T] = {
       nestPathOnError(value, _.nestAttribute(attr))
     }

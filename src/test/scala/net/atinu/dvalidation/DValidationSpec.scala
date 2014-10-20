@@ -41,46 +41,6 @@ class DValidationSpec extends ValidationSuite {
     a should beValidResult(Some(1))
   }
 
-  test("define a validation chain") {
-    val a = 1
-    val v1 = isEqual(a, 1)
-    val v2 = isEqual(a, 2)
-
-    val resV = v1.findSuccess(v2)
-
-    resV should beValid
-  }
-
-  test("define a validation chain2") {
-    val a = 3
-    val v1 = isEqual(a, 1)
-    val v2 = isEqual(a, 2)
-
-    val resV = v1.findSuccess(v2)
-
-    resV should beInvalid
-  }
-
-  test("define a specific validation chain") {
-    val a = 1
-    val v1 = isEqual(a, 1)
-    val v2 = isEqual(a, 2)
-
-    val resV = v1.isValidOr(v2)
-
-    resV should beValid
-  }
-
-  test("define a specific validation chain2") {
-    val a = 3
-    val v1 = isEqual(a, 1)
-    val v2 = isEqual(a, 2)
-
-    val resV = v1 isValidOr v2
-
-    resV should beInvalid
-  }
-
   test("do a custom validation") {
     val a = if ("a" == "a") "a".valid else invalid("a", "error.notA")
     a should beValid
