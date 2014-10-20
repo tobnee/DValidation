@@ -26,6 +26,10 @@ object Validator {
       case scala.util.Failure(e) => new IsTryFailureError(e).invalid
     }
 
+  def isEqual[T](value: T, valueExpected: T): DValidation[T] =
+    if (value == valueExpected) value.valid
+    else new IsNotEqualError(value, valueExpected).invalid
+
   def ensure[T](s: T)(key: String, args: Any*)(v: T => Boolean): DValidation[T] =
     if (v(s)) s.success else new CustomValidationError(s, key, args.map(_.toString)).invalid
 
@@ -229,6 +233,10 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathStri
 
   override def hashCode(): Int =
     java.util.Arrays.asList(value, msgKey, path, args).hashCode()
+}
+
+class IsNotEqualError(valueExpected: Any, value: Any, path: PathString = Path.SingleSlash) extends AbstractDomainError(value, "error.dvalidation.notEqual", path, Seq(valueExpected.toString)) {
+  def copyWithPath(path: PathString) = new IsNotEqualError(valueExpected, value, path)
 }
 
 class IsEmptyStringError(path: PathString = Path.SingleSlash) extends AbstractDomainError("", "error.dvalidation.emptyString", path) {

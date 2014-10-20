@@ -41,9 +41,6 @@ class DValidationSpec extends ValidationSuite {
     a should beValidResult(Some(1))
   }
 
-  def isEqual[T](valueCheck: T, valueExcept: T) =
-    ensure(valueCheck)("error.dvalidation.isequal", valueExcept)(a => a == valueExcept)
-
   test("define a validation chain") {
     val a = 1
     val v1 = isEqual(a, 1)
@@ -127,7 +124,7 @@ class DValidationSpec extends ValidationSuite {
       isSome(vtest.c) forAttribute 'c
     )
     validateWith should beInvalidWithErrors(
-      new CustomValidationError(1, "error.dvalidation.isequal", Seq("2"), "/a".asPath),
+      new IsNotEqualError(1, 2).nestAttribute('a),
       new IsEmptyStringError("/b".asPath),
       new IsNoneError("/c".asPath)
     )
@@ -138,9 +135,9 @@ class DValidationSpec extends ValidationSuite {
       validateWith.forAttribute('nest)
     )
     resNest should beInvalidWithErrors(
-      CustomValidationError(5, "error.dvalidation.isequal", args = "1")
+      new IsNotEqualError(5, 1)
         .nestAttribute('value),
-      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
+      new IsNotEqualError(1, 2)
         .nestAttribute('a).nestAttribute('nest),
       new IsEmptyStringError("/nest/b".asPath),
       new IsNoneError("/nest/c".asPath)
@@ -169,10 +166,8 @@ class DValidationSpec extends ValidationSuite {
       )
 
     res should beInvalidWithErrors(
-      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
-        .nestAttribute('value),
-      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
-        .nest("/tests/[0]/a".asPath),
+      new IsNotEqualError(1, 2).nestAttribute('value),
+      new IsNotEqualError(1, 2).nest("/tests/[0]/a".asPath),
       new IsEmptyStringError("/tests/[0]/b".asPath),
       new IsNoneError("/tests/[0]/c".asPath),
       new IsEmptyStringError("/tests/[1]/b".asPath)
