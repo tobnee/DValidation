@@ -203,10 +203,18 @@ object Path {
   def unwrap(path: PathString): String = Tag.unsubst[String, Id, Path](path)
 }
 
+object DomainError {
+
+  def unapply(v: DomainError) =
+    Some((v.value, v.msgKey, v.path, v.args))
+
+}
+
 trait DomainError {
   def value: Any
   def msgKey: String
   def path: PathString
+  def args: Seq[String]
   def nest(path: PathString): DomainError
   def nestAttribute(segment: Symbol): DomainError
   def nestIndex(index: Int): DomainError

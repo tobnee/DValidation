@@ -154,4 +154,10 @@ class DValidationSpec extends ValidationSuite {
     a should equal(new IsEmptyStringError("/tests/[0]/b".asPath))
   }
 
+  test("has an element extractor API") {
+    val DomainError(value, key, _, _) = new CustomValidationError("value", "key")
+    key should equal("key")
+    value should equal("value")
+  }
+
 }
