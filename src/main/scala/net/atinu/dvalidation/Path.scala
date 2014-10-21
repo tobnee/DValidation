@@ -1,5 +1,6 @@
 package net.atinu.dvalidation
 
+import scala.util.Try
 import scalaz._
 
 sealed trait Path
@@ -8,6 +9,9 @@ object Path {
 
   import scalaz.Id._
 
+  /**
+   * A tagged type for path strings (e.g. /, /a/b)
+   */
   type PathString = String @@ Path
 
   val SingleSlash = wrap("/")
@@ -20,9 +24,15 @@ object Path {
 
   def isValidPath(path: String): Boolean = r.matcher(path).matches()
 
-  def wrap(path: String): PathString =
-    if (isValidPath(path)) wrapInternal(path)
-    else throw new IllegalArgumentException(s"$path is not a valid path")
+  def wrap(path: String): PathString = wrapTry(path) match {
+    case scala.util.Success(v) => v
+    case scala.util.Failure(e) => throw e
+  }
+
+  def wrapTry(path: String): Try[PathString] = {
+    if (isValidPath(path)) Try(wrapInternal(path))
+    else scala.util.Failure(new IllegalArgumentException(s"$path is not a valid path"))
+  }
 
   private[dvalidation] def wrapInternal(path: String): PathString = Tag[String, Path](path)
 

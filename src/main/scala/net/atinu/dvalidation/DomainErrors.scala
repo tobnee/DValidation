@@ -19,6 +19,10 @@ object DomainErrors {
     NonEmptyList.unapplySeq(e.errors)
 }
 
+/**
+ * Container for [[DomainError]]. Every instance of this class has to reference at least one
+ * [[DomainError]].
+ */
 final class DomainErrors private (e: NonEmptyList[DomainError]) {
 
   def errors: NonEmptyList[DomainError] = e

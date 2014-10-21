@@ -10,38 +10,70 @@ package object dvalidation {
   type DValidator[T] = T => DValidation[T]
 
   implicit class ErrorToFailure(val error: DomainError) extends AnyVal {
-    def invalid[T] = DomainErrors.withSingleError(error).fail[T]
+    /**
+     * lift a [[DomainError]] to a failed [[DValidation]]
+     */
+    def invalid[T]: DValidation[T] = DomainErrors.withSingleError(error).fail[T]
   }
 
   implicit class tToSuccess[T](val value: T) extends AnyVal {
+    /**
+     * lift any value to a successful [[DValidation]]
+     */
     def valid: DValidation[T] = value.success[DomainErrors]
   }
 
   implicit class tToValidation[T](val value: T) extends AnyVal {
+    /**
+     * Validate any value
+     * @param validations a sequence of validation of any type
+     * @return if all validations are a [[scalaz.Success]] then Success(value) else a
+     *         [[scalaz.Failure]] with all error from the validations list
+     */
     def validateWith(validations: DValidation[_]*): DValidation[T] = {
       applyValidations(validations, value)
     }
   }
 
   implicit class tryToValidation[T](val value: Try[T]) extends AnyVal {
+    /**
+     * Convert a [[scala.util.Try]] to a [[DValidation]]
+     * @see [[IsTryFailureError]]
+     */
     def asValidation: DValidation[T] = Validator.isTrySuccess(value).map(_.get)
   }
 
   implicit class optToValidation[T](val value: Option[T]) extends AnyVal {
+    /**
+     * Convert a [[scala.Option]] to a [[DValidation]]
+     * @see [[IsNoneError]]
+     */
     def asValidation: DValidation[T] = Validator.isSome(value).map(_.get)
   }
 
   implicit class dvalidationToValidationNel[T](val value: DValidation[T]) extends AnyVal {
+    /**
+     * Convert a [[DValidation]] to a [[scalaz.ValidationNel]] should be used instead
+     * of [[scalaz.Validation.toValidationNel]]
+     */
     def asValidationNel: ValidationNel[DomainError, T] = value.leftMap(_.errors)
   }
 
   implicit class dSeqValidation[T](val value: IndexedSeq[DValidation[T]]) extends AnyVal {
 
+    /**
+     * @see [[DomainError.nestAttribute]]
+     */
     def forAttribute(attr: Symbol): IndexedSeq[DValidation[T]] = {
       value.map(validation => nestPathOnError(validation, _.nestAttribute(attr)))
     }
 
-    def collapse = {
+    /**
+     * Collapse a sequence of [[DValidation]] to one
+     * @return if all validations are successful return a list of all valid values
+     *         otherwise return a failures with all errors accumulated
+     */
+    def collapse: DValidation[IndexedSeq[T]] = {
       val valid = value.flatMap(v => v.toOption).valid
       validateAll(value, valid)
     }
@@ -49,13 +81,21 @@ package object dvalidation {
 
   implicit class dValFirstSuccess[T](val value: DValidation[T]) extends AnyVal {
 
+    /**
+     * @see [[DomainError.nestAttribute]]
+     */
     def forAttribute(attr: Symbol): DValidation[T] = {
       nestPathOnError(value, _.nestAttribute(attr))
     }
 
-    def errorView = value.fold(Option.apply, _ => None)
+    def errorView: Option[DomainErrors] = value.fold(Option.apply, _ => None)
 
-    def withValidations(validations: Seq[DValidation[_]]) =
+    /**
+     * Add validation results to the current validation, while keeping the parent
+     * success value
+     * @see [[Validator.validSequence]]
+     */
+    def withValidations(validations: Seq[DValidation[_]]): DValidation[T] =
       validateAll(validations, value)
   }
 

@@ -8,6 +8,10 @@ object DomainError {
     Some((v.value, v.msgKey, v.path, v.args))
 }
 
+/**
+ * Represents an error and attaches information to it which can be used for
+ * translation and error handling in general.
+ */
 trait DomainError {
   def value: Any
   def msgKey: String
@@ -18,6 +22,9 @@ trait DomainError {
   def nestIndex(index: Int): DomainError
 }
 
+/**
+ * A base class which can be used to define a custom [[DomainError]]
+ */
 abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathString = Path.SingleSlash, argsP: Seq[String] = Nil) extends DomainError {
   def value = valueP
   def msgKey = msgKeyP
