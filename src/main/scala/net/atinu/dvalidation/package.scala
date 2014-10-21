@@ -124,7 +124,7 @@ package object dvalidation {
   implicit def errorsSemiGroup: Semigroup[DomainErrors] =
     new Semigroup[DomainErrors] {
       def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {
-        val errors = Semigroup[NonEmptyList[DomainError]].append(f1.errors, f2.errors)
+        val errors = f1.errors append f2.errors
         DomainErrors.fromNel(errors)
       }
     }
