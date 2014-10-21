@@ -161,7 +161,14 @@ final class DomainErrors private (e: NonEmptyList[DomainError]) {
     errors.list.filter(error => runtimeClass.isInstance(error)).asInstanceOf[List[T]]
   }
 
-  def map(t: DomainError => DomainError) = new DomainErrors(errors.map(t))
+  def map(t: DomainError => DomainError): DomainErrors =
+    new DomainErrors(errors.map(t))
+
+  def flatMap(t: DomainError => DomainErrors): DomainErrors =
+    new DomainErrors(errors.flatMap(t.andThen(_.errors)))
+
+  def append(e: DomainErrors) =
+    new DomainErrors(this.errors.append(e.errors))
 
   override def toString = errors.list.mkString(",")
 

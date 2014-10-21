@@ -133,31 +133,4 @@ class DValidationSpec extends ValidationSuite {
       new IsEmptyStringError("/tests/[1]/b".asPath)
     )
   }
-
-  test("DomainErrors can be filtered by type") {
-    DomainErrors.withErrors(
-      new IsEmptyStringError("/tests/[0]/b".asPath),
-      new IsNoneError("/tests/[0]/c".asPath),
-      new IsEmptyStringError("/tests/[1]/b".asPath)
-    ).errorsOfType[IsNoneError] should contain(new IsNoneError("/tests/[0]/c".asPath))
-  }
-
-  test("has a sequence extractor API") {
-    val e = DomainErrors.withErrors(
-      new IsEmptyStringError("/tests/[0]/b".asPath),
-      new IsNoneError("/tests/[0]/c".asPath),
-      new IsEmptyStringError("/tests/[1]/b".asPath)
-    )
-    val a = e match {
-      case DomainErrors(e1, as @ _*) => e1
-    }
-    a should equal(new IsEmptyStringError("/tests/[0]/b".asPath))
-  }
-
-  test("has an element extractor API") {
-    val DomainError(value, key, _, _) = new CustomValidationError("value", "key")
-    key should equal("key")
-    value should equal("value")
-  }
-
 }
