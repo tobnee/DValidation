@@ -121,11 +121,13 @@ package object dvalidation {
     }
   }
 
-  implicit def errorsSemiGroup: Semigroup[DomainErrors] =
-    new Semigroup[DomainErrors] {
+  implicit def domainErrorsInstances =
+    new Semigroup[DomainErrors] with Equal[DomainErrors] {
       def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {
         val errors = f1.errors append f2.errors
         DomainErrors.fromNel(errors)
       }
+
+      def equal(a1: DomainErrors, a2: DomainErrors): Boolean = a1 == a2
     }
 }

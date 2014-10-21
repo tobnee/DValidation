@@ -12,7 +12,11 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )
 
-libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.0.6"
+val scalazVersion = "7.0.6"
+
+libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion
+
+libraryDependencies += "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion % "test"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
