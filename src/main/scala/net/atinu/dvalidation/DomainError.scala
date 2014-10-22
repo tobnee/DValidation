@@ -122,6 +122,12 @@ class IsTryFailureError(value: Throwable, path: PathString = Path.SingleSlash) e
   def copyWithPath(path: PathString) = new IsTryFailureError(value, path)
 }
 
+class IsNotGreaterThenError(valueMin: Any, value: Any, isInclusive: Boolean, path: PathString = Path.SingleSlash)
+    extends AbstractDomainError(value, "error.dvalidation.notEqual", path, Seq(valueMin.toString, isInclusive.toString)) {
+
+  def copyWithPath(path: PathString) = new IsNotGreaterThenError(valueMin, value, isInclusive, path)
+}
+
 object CustomValidationError {
   def apply(value: Any, key: String, args: String*) = new CustomValidationError(value, key, args.toSeq)
 }

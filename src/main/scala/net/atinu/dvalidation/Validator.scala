@@ -1,5 +1,6 @@
 package net.atinu.dvalidation
 
+import scala.math.Ordering
 import scala.util.Try
 import scalaz._
 import scalaz.syntax.validation._
@@ -39,6 +40,15 @@ object Validator {
   def isEqual[T](value: T, valueExpected: T): DValidation[T] =
     if (value == valueExpected) value.valid
     else new IsNotEqualError(value, valueExpected).invalid
+
+  /**
+   * @see [[IsNotGreaterThenError]]
+   */
+  def isGreaterThan[T](value: T, valueMin: T, isInclusive: Boolean = false)(implicit ev: Ordering[T]): DValidation[T] = {
+    val isGt = if (isInclusive) ev.gteq _ else ev.gt _
+    if (isGt(value, valueMin)) value.valid
+    else new IsNotGreaterThenError(valueMin, value, isInclusive).invalid
+  }
 
   /**
    * A ad-hoc validation function

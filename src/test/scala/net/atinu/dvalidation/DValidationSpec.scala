@@ -41,6 +41,22 @@ class DValidationSpec extends ValidationSuite {
     a should beValidResult(Some(1))
   }
 
+  test("Validate a > b") {
+    isGreaterThan(3, 2) should beValidResult(3)
+  }
+
+  test("Validate a > b - error") {
+    isGreaterThan(2, 3) should beInvalidWithError(new IsNotGreaterThenError(3, 2, false))
+  }
+
+  test("Validate a >= b") {
+    isGreaterThan(3, 3, isInclusive = true) should beValidResult(3)
+  }
+
+  test("Validate a >= b - error") {
+    isGreaterThan(2, 3, isInclusive = true) should beInvalidWithError(new IsNotGreaterThenError(3, 2, true))
+  }
+
   test("do a custom validation") {
     val a = if ("a" == "a") "a".valid else invalid("a", "error.notA")
     a should beValid
