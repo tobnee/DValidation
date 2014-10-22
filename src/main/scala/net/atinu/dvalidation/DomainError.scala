@@ -13,12 +13,38 @@ object DomainError {
  * translation and error handling in general.
  */
 trait DomainError {
+  /** reference value of the error */
   def value: Any
+
+  /** a string representation of the error type (e.g. dvalidaton.errors.foo) */
   def msgKey: String
+
+  /** a path to map an error to its location in a nested object */
   def path: PathString
+
+  /** arguments of the error (e.g. expected values) */
   def args: Seq[String]
+
+  /**
+   * create a new domain error with a path prepended to the existing path
+   * (e.g. starting with a path /e and an argument /a the result is /e/a)
+   */
   def nest(path: PathString): DomainError
+
+  /**
+   * @param segment a path represented as symbol
+   * @return a domain error with a new path prepended with the name of
+   *         the symbol
+   * @see [[nest]]
+   */
   def nestAttribute(segment: Symbol): DomainError
+
+  /**
+   * @param index a path represented as int
+   * @return a domain error with a new path prepended with the index
+   *         surrounded by [] (e.g from /a with 1 to /a/[1])
+   * @see [[nest]]
+   */
   def nestIndex(index: Int): DomainError
 }
 
@@ -27,8 +53,11 @@ trait DomainError {
  */
 abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathString = Path.SingleSlash, argsP: Seq[String] = Nil) extends DomainError {
   def value = valueP
+
   def msgKey = msgKeyP
+
   def path = pathP
+
   def args = argsP
 
   def copyWithPath(path: PathString): DomainError

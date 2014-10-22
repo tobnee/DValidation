@@ -9,9 +9,7 @@ object Path {
 
   import scalaz.Id._
 
-  /**
-   * A tagged type for path strings (e.g. /, /a/b)
-   */
+  /** A tagged type for path strings (e.g. /, /a/b) */
   type PathString = String @@ Path
 
   val SingleSlash = wrap("/")
