@@ -35,10 +35,19 @@ object Validator {
     }
 
   /**
+   * Uses the == operator on AnyRef for checking equality
    * @see [[IsNotEqualError]]
    */
   def isEqual[T](value: T, valueExpected: T): DValidation[T] =
     if (value == valueExpected) value.valid
+    else new IsNotEqualError(value, valueExpected).invalid
+
+  /**
+   * Uses an instance of [[scalaz.Equal]] for checking equality
+   * @see [[IsNotEqualError]]
+   */
+  def isEqualStrict[T](value: T, valueExpected: T)(implicit ev: Equal[T]): DValidation[T] =
+    if (ev.equal(value, valueExpected)) value.valid
     else new IsNotEqualError(value, valueExpected).invalid
 
   /**
