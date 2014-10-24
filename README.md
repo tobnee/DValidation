@@ -27,7 +27,7 @@ val mikael = Musician("Mikael Åkerfeldt", 40, List(Guitar, BassGuitar))
 val martin = Musician("Martin Mendez", 17, List(BassGuitar))
 
 val res: DValidation[Musician] = mikael.validateWith(
-  notEmpty(mikael.name) forAttribute 'name,
+  notBlank(mikael.name) forAttribute 'name,
   ensure(mikael.age)("error.dvalidation.legalage", 18)(_ > 18) forAttribute 'age,
   hasElements(mikael.instruments) forAttribute 'instruments
 )
@@ -52,7 +52,7 @@ defined as follows:
 ```scala
 val musicianValidator: DValidator[Musician] = Validator.template[Musician] { musician =>
   musician.validateWith(
-  notEmpty(musician.name) forAttribute 'name,
+  notBlank(musician.name) forAttribute 'name,
   ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18) forAttribute 'age,
   hasElements(musician.instruments) forAttribute 'instruments
  )
@@ -79,7 +79,7 @@ val stringInstrumentValidator = Validator.template[Instrument](i =>
 )
 
 max.validateWith(
-  notEmpty(max.name) forAttribute 'name,
+  notBlank(max.name) forAttribute 'name,
   ensure(max.age)("error.dvalidation.legalage", 18)(_ > 18) forAttribute 'age,
   hasElements(max.instruments) forAttribute 'instruments
 ).withValidations(
@@ -93,6 +93,19 @@ the sequence.
 ```scala
 Failure(DomainError(path: /instruments/[0], value: Piano, msgKey: error.dvalidation.stringinstrument, args: Keyboard))
 ```
+
+## Default Validators
+Function       | Syntax       | Information 
+-------------- | -------------|------------
+notBlank       |              | notBlank("a") or notBlank(" ", trimWhitespace = true)  
+hasElements    |              | hasElements(List(1,2,3))
+isSome         |              | isSome(Option(2))
+isTrySuccess   |              | isTrySuccess(Try{ "bla" })
+isEqual        | is_==        | 1 is_== 1 
+isEqualStrict  | is_===       | 1 is_=== 1 
+isGreaterThan  | is_> / is_>= | 2 is_> 1 
+isSmallerThan  | is_< / is_<  | 1 is_< 2 
+isInRange      |              | isInRange(4, min = 1, max = 5)
 
 ## Define Custom Validators
 The ensure combinator offers a simple approach how to define a custom validator.
@@ -117,7 +130,7 @@ val musicianValidatorApplicative = Validator.template[Musician] { musician =>
   val atLeastOneString = stringInstrument.flatMap(value => hasElements(value))
   val hasLegalAge = ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18)
 
-  ((notEmpty(musician.name) forAttribute 'name) |@|
+  ((notBlank(musician.name) forAttribute 'name) |@|
    (hasLegalAge forAttribute 'age) |@|
    (atLeastOneString forAttribute 'instruments))(Musician.apply)
 }
