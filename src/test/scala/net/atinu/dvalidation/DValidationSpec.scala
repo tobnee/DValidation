@@ -7,12 +7,20 @@ class DValidationSpec extends ValidationSuite {
   import net.atinu.dvalidation.Path._
   import net.atinu.dvalidation.Validator._
 
-  test("String is empty") {
-    notEmpty("") should beInvalidWithError(new IsEmptyStringError())
+  test("String is blank") {
+    notBlank("") should beInvalidWithError(new IsEmptyStringError())
   }
 
-  test("String is not empty") {
-    notEmpty("s") should beValidResult("s")
+  test("String with whitespace is blank") {
+    notBlank(" ") should beInvalidWithError(new IsEmptyStringError())
+  }
+
+  test("String with whitespace is not blank") {
+    notBlank(" ", trimWhitespace = false) should beValidResult(" ")
+  }
+
+  test("String is not blank") {
+    notBlank("s") should beValidResult("s")
   }
 
   test("validate any value") {
@@ -114,7 +122,7 @@ class DValidationSpec extends ValidationSuite {
     val vtest = VTest(1, "sdf", Some("a"))
     val res: DValidation[VTest] = vtest.validateWith(
       ensure(vtest.a)("should be 1", 1)(_ == 1),
-      notEmpty(vtest.b)
+      notBlank(vtest.b)
     )
     res should beValidResult(vtest)
   }
@@ -123,7 +131,7 @@ class DValidationSpec extends ValidationSuite {
     val vtest = VTest(1, "", Some("a"))
     val res = vtest.validateWith(
       ensure(vtest.a)("validation.equal", 2)(_ == 2),
-      notEmpty(vtest.b)
+      notBlank(vtest.b)
     )
     res should beInvalidWithErrors(
       new CustomValidationError(1, "validation.equal", Seq("2")),
@@ -137,7 +145,7 @@ class DValidationSpec extends ValidationSuite {
     val vtest = VTest(1, "", None)
     val validateWith = vtest.validateWith(
       (vtest.a is_== 2) forAttribute 'a,
-      notEmpty(vtest.b) forAttribute 'b,
+      notBlank(vtest.b) forAttribute 'b,
       isSome(vtest.c) forAttribute 'c
     )
     validateWith should beInvalidWithErrors(
@@ -171,7 +179,7 @@ class DValidationSpec extends ValidationSuite {
     val vtestValidator: DValidator[VTest] = Validator.template[VTest] { value =>
       value.validateWith(
         isEqual(value.a, 2) forAttribute 'a,
-        notEmpty(value.b) forAttribute 'b,
+        notBlank(value.b) forAttribute 'b,
         isSome(value.c) forAttribute 'c
       )
     }

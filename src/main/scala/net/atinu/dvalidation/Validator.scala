@@ -9,8 +9,10 @@ object Validator {
   /**
    * @see [[IsEmptyStringError]]
    */
-  def notEmpty(s: String): DValidation[String] =
-    if (s.isEmpty) new IsEmptyStringError().invalid else s.valid
+  def notBlank(s: String, trimWhitespace: Boolean = true): DValidation[String] = {
+    val testStr = if (trimWhitespace) s.trim else s
+    if (testStr.isEmpty) new IsEmptyStringError().invalid else s.valid
+  }
 
   /**
    * @see [[IsEmptySeqError]]

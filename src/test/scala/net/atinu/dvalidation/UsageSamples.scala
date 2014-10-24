@@ -25,7 +25,7 @@ object UsageSamples extends App {
   val martin = Musician("Martin Mendez", 17, List(BassGuitar))
 
   val res: DValidation[Musician] = mikael.validateWith(
-    notEmpty(mikael.name) forAttribute 'name,
+    notBlank(mikael.name) forAttribute 'name,
     ensure(mikael.age)("error.dvalidation.legalage", 18)(_ > 18) forAttribute 'age,
     hasElements(mikael.instruments) forAttribute 'instruments
   )
@@ -34,7 +34,7 @@ object UsageSamples extends App {
   // Validation Templates
   val musicianValidator: DValidator[Musician] = Validator.template[Musician] { musician =>
     musician.validateWith(
-      notEmpty(musician.name) forAttribute 'name,
+      notBlank(musician.name) forAttribute 'name,
       ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18) forAttribute 'age,
       hasElements(musician.instruments) forAttribute 'instruments
     )
@@ -52,7 +52,7 @@ object UsageSamples extends App {
   )
 
   max.validateWith(
-    notEmpty(max.name) forAttribute 'name,
+    notBlank(max.name) forAttribute 'name,
     ensure(max.age)("error.dvalidation.legalage", 18)(_ > 18) forAttribute 'age,
     hasElements(max.instruments) forAttribute 'instruments
   ).withValidations(
@@ -68,7 +68,7 @@ object UsageSamples extends App {
     val atLeastOneString = stringInstrument.flatMap(value => hasElements(value))
     val legalAge = ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18)
 
-    ((notEmpty(musician.name) forAttribute 'name) |@|
+    ((notBlank(musician.name) forAttribute 'name) |@|
       (legalAge forAttribute 'age) |@|
       (atLeastOneString forAttribute 'instruments))(Musician.apply)
   }
