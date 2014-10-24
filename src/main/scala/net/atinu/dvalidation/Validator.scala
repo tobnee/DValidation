@@ -50,6 +50,12 @@ object Validator {
     else new IsNotGreaterThenError(valueMin, value, isInclusive).invalid
   }
 
+  implicit class ValidationCombinatorSyntax[T](val a: T) extends AnyVal {
+    def is_>(b: T)(implicit ev: Ordering[T]) = isGreaterThan(a, b)
+    def is_>=(b: T)(implicit ev: Ordering[T]) = isGreaterThan(a, b, isInclusive = true)
+    def is_==(b: T) = isEqual(a, b)
+  }
+
   /**
    * A ad-hoc validation function
    *

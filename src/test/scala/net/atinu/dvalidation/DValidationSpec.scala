@@ -43,6 +43,7 @@ class DValidationSpec extends ValidationSuite {
 
   test("Validate a > b") {
     isGreaterThan(3, 2) should beValidResult(3)
+    3 is_> 2 should beValidResult(3)
   }
 
   test("Validate a > b - error") {
@@ -51,6 +52,7 @@ class DValidationSpec extends ValidationSuite {
 
   test("Validate a >= b") {
     isGreaterThan(3, 3, isInclusive = true) should beValidResult(3)
+    (3 is_>= 3) should beValidResult(3)
   }
 
   test("Validate a >= b - error") {
@@ -95,7 +97,7 @@ class DValidationSpec extends ValidationSuite {
   test("validate case class for attribute") {
     val vtest = VTest(1, "", None)
     val validateWith = vtest.validateWith(
-      isEqual(vtest.a, 2) forAttribute 'a,
+      (vtest.a is_== 2) forAttribute 'a,
       notEmpty(vtest.b) forAttribute 'b,
       isSome(vtest.c) forAttribute 'c
     )
