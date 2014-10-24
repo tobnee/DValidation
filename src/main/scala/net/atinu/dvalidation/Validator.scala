@@ -44,8 +44,8 @@ object Validator {
   /**
    * @see [[IsNotGreaterThenError]]
    */
-  def isGreaterThan[T](value: T, valueMin: T, isInclusive: Boolean = false)(implicit ev: Ordering[T]): DValidation[T] = {
-    val isGt = if (isInclusive) ev.gteq _ else ev.gt _
+  def isGreaterThan[T](value: T, valueMin: T, isInclusive: Boolean = false)(implicit ev: Order[T]): DValidation[T] = {
+    val isGt = if (isInclusive) ev.greaterThanOrEqual _ else ev.greaterThan _
     if (isGt(value, valueMin)) value.valid
     else new IsNotGreaterThenError(valueMin, value, isInclusive).invalid
   }
@@ -53,17 +53,17 @@ object Validator {
   /**
    * @see [[IsNotGreaterThenError]]
    */
-  def isSmallerThan[T](value: T, valueMax: T, isInclusive: Boolean = false)(implicit ev: Ordering[T]): DValidation[T] = {
-    val isLt = if (isInclusive) ev.lteq _ else ev.lt _
+  def isSmallerThan[T](value: T, valueMax: T, isInclusive: Boolean = false)(implicit ev: Order[T]): DValidation[T] = {
+    val isLt = if (isInclusive) ev.lessThanOrEqual _ else ev.lessThanOrEqual _
     if (isLt(value, valueMax)) value.valid
     else new IsNotLowerThenError(valueMax, value, isInclusive).invalid
   }
 
   implicit class ValidationCombinatorSyntax[T](val a: T) extends AnyVal {
-    def is_>(b: T)(implicit ev: Ordering[T]) = isGreaterThan(a, b)
-    def is_>=(b: T)(implicit ev: Ordering[T]) = isGreaterThan(a, b, isInclusive = true)
-    def is_<(b: T)(implicit ev: Ordering[T]) = isSmallerThan(a, b)
-    def is_<=(b: T)(implicit ev: Ordering[T]) = isSmallerThan(a, b, isInclusive = true)
+    def is_>(b: T)(implicit ev: Order[T]) = isGreaterThan(a, b)
+    def is_>=(b: T)(implicit ev: Order[T]) = isGreaterThan(a, b, isInclusive = true)
+    def is_<(b: T)(implicit ev: Order[T]) = isSmallerThan(a, b)
+    def is_<=(b: T)(implicit ev: Order[T]) = isSmallerThan(a, b, isInclusive = true)
     def is_==(b: T) = isEqual(a, b)
   }
 
