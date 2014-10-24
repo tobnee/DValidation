@@ -1,6 +1,5 @@
 package net.atinu.dvalidation
 
-import scala.math.Ordering
 import scala.util.Try
 import scalaz._
 import scalaz.syntax.validation._
@@ -74,6 +73,7 @@ object Validator {
     def is_<(b: T)(implicit ev: Order[T]) = isSmallerThan(a, b)
     def is_<=(b: T)(implicit ev: Order[T]) = isSmallerThan(a, b, isInclusive = true)
     def is_==(b: T) = isEqual(a, b)
+    def is_===(b: T)(implicit ev: Equal[T]) = isEqualStrict(a, b)
   }
 
   /**

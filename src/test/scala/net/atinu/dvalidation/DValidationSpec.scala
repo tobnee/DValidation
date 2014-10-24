@@ -53,11 +53,13 @@ class DValidationSpec extends ValidationSuite {
   test("Validate is equal strict") {
     import scalaz.std.anyVal._
     isEqualStrict(2, 2) should beValidResult(2)
+    (2 is_=== 2) should beValidResult(2)
   }
 
   test("validate is equal strict - error") {
     import scalaz.std.anyVal._
     isEqualStrict(2, 3) should beInvalidWithError(new IsNotEqualError(2, 3))
+    (2 is_=== 3) should beInvalidWithError(new IsNotEqualError(2, 3))
   }
 
   test("Validate a > b") {
