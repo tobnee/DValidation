@@ -1,5 +1,19 @@
 # DValidation
-A little, opinionated domain object validation toolkit on top of [scalaz](https://github.com/scalaz/scalaz)
+DValidation is a little, opinionated domain object validation toolkit on top of 
+[scalaz](https://github.com/scalaz/scalaz). While scalaz already offers the great
+[Validation](http://eed3si9n.com/learning-scalaz/Validation.html) abstractions for
+building, composing and transforming validations it is a very general tool. 
+
+DValidation tries to be more opinionated with the goal to offer tools for
+common validation situations including:
+
+* A set of [validator functions](https://github.com/tobnee/DValidation#default-validators)
+* A custom error aggregation type (DomainErrors)
+* An abstract, translation friendly error type (DomainError) 
+* A set of classes representing common error cases (IsEmptyStringError, IsNotGreaterThenError, ...)
+* A Path abstraction for locating errors in a class hierarchy
+* [Converters](https://github.com/tobnee/DValidation#standard-library-conversions) from other error representations
+* [Utilities](https://github.com/tobnee/DValidation/blob/3abf6ed0580281799e9b20a573be714fed88d90e/src/test/scala/net/atinu/dvalidation/DValidationSpec.scala#L224-L230) to support testing validations
 
 !["Build Status"](https://travis-ci.org/tobnee/DValidation.svg?branch=master)
 
