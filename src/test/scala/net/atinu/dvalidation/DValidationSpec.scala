@@ -106,6 +106,27 @@ class DValidationSpec extends ValidationSuite {
     isSmallerThan(3, 2, isInclusive = true) should beInvalidWithError(new IsNotLowerThenError(2, 3, true))
   }
 
+  test("Validate a < b < c") {
+    isInRange(4, min = 1, max = 5) should beValidResult(4)
+  }
+
+  test("Validate a < b < c - error high") {
+    isInRange(6, min = 1, max = 5) should beInvalidWithError(new IsNotLowerThenError(5, 6, false))
+  }
+
+  test("Validate a < b < c - error low") {
+    isInRange(0, min = 1, max = 5) should beInvalidWithError(new IsNotGreaterThenError(1, 0, false))
+  }
+
+  test("isInRange should only work on valid ranges") {
+    intercept[IllegalArgumentException] {
+      isInRange(0, min = 8, max = 7)
+    }
+    intercept[IllegalArgumentException] {
+      isInRange(0, min = 8, max = 8)
+    }
+  }
+
   test("do a custom validation") {
     val a = if ("a" == "a") "a".valid else invalid("a", "error.notA")
     a should beValid

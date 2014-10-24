@@ -14,10 +14,11 @@ class DomainErrorsSpec extends ValidationSuite {
   }
 
   test("can map over domain errors") {
+    val newError = CustomValidationError("", "dvalidation.error.emptyName").copyWithPath("/tests/[0]".asPath)
     DomainErrors
       .withSingleError(new IsEmptyStringError("/tests/[0]/b".asPath))
-      .map(error => new IsEmptyStringError("/tests/[0]".asPath)) should equal(DomainErrors
-        .withSingleError(new IsEmptyStringError("/tests/[0]".asPath)))
+      .map(error => newError) should equal(DomainErrors
+        .withSingleError(newError))
   }
 
   test("can flatMap over domain errors") {

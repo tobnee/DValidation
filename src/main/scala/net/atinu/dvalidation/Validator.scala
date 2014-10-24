@@ -69,6 +69,24 @@ object Validator {
     else new IsNotLowerThenError(valueMax, value, isInclusive).invalid
   }
 
+  /**
+   * Validate if a value is in a range of min < value < max
+   * @see [[IsNotGreaterThenError]]
+   * @see [[IsNotGreaterThenError]]
+   */
+  def isInRange[T](value: T, min: T, max: T, inclusiveMin: Boolean = false, inclusiveMax: Boolean = false)(implicit ev: Order[T]): DValidation[T] = {
+    if (ev.greaterThanOrEqual(min, max)) throw new IllegalArgumentException(s"wrong validation definition min: $min >= max: $max")
+    else accumulateErrors(isSmallerThan(value, max, inclusiveMin), isGreaterThan(value, min, inclusiveMax))
+  }
+
+  private def accumulateErrors[EE, AA](t: Validation[EE, AA], that: Validation[EE, AA])(implicit es: Semigroup[EE]): Validation[EE, AA] = t match {
+    case Failure(e) => that match {
+      case Failure(e0) => Failure(es.append(e, e0))
+      case success => t
+    }
+    case success => that
+  }
+
   implicit class ValidationCombinatorSyntax[T](val a: T) extends AnyVal {
     def is_>(b: T)(implicit ev: Order[T]) = isGreaterThan(a, b)
     def is_>=(b: T)(implicit ev: Order[T]) = isGreaterThan(a, b, isInclusive = true)
