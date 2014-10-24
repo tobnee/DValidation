@@ -127,6 +127,16 @@ class DValidationSpec extends ValidationSuite {
     }
   }
 
+  test("Validate if not Monoid zero") {
+    import scalaz.std.anyVal._
+    notZero(1) should beValidResult(1)
+  }
+
+  test("Validate if not Monoid zero - error") {
+    import scalaz.std.anyVal._
+    notZero(0) should beInvalidWithError(new IsZeroError(0))
+  }
+
   test("do a custom validation") {
     val a = if ("a" == "a") "a".valid else invalid("a", "error.notA")
     a should beValid

@@ -2,6 +2,8 @@ package net.atinu.dvalidation
 
 import net.atinu.dvalidation.Path.PathString
 
+import scalaz.Monoid
+
 object DomainError {
 
   def unapply(v: DomainError) =
@@ -105,6 +107,10 @@ class IsNotEqualError(valueExpected: Any, value: Any, path: PathString = Path.Si
 
 class IsEmptyStringError(path: PathString = Path.SingleSlash) extends AbstractDomainError("", "error.dvalidation.emptyString", path) {
   def copyWithPath(path: PathString) = new IsEmptyStringError(path)
+}
+
+class IsZeroError(value: Any, path: PathString = Path.SingleSlash) extends AbstractDomainError(value, "error.dvalidation.notEqual", path) {
+  def copyWithPath(path: PathString) = new IsZeroError(value, path)
 }
 
 class IsEmptySeqError(path: PathString = Path.SingleSlash) extends AbstractDomainError(Nil, "error.dvalidation.emptySeq", path) {

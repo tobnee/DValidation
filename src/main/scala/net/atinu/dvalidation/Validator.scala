@@ -7,6 +7,8 @@ import scalaz.syntax.validation._
 object Validator {
 
   /**
+   * Check if a string is not blank
+   * @param trimWhitespace remove the leading and trailing whitespace before checking
    * @see [[IsEmptyStringError]]
    */
   def notBlank(s: String, trimWhitespace: Boolean = true): DValidation[String] = {
@@ -15,18 +17,28 @@ object Validator {
   }
 
   /**
+   * Check if a value is a [[Monoid.zero]]
+   * @see [[IsZeroError]]
+   */
+  def notZero[T](s: T)(implicit m: Monoid[T], e: Equal[T]): DValidation[T] =
+    if (m.isMZero(s)) new IsZeroError(s).invalid else s.success
+
+  /**
+   * Check if a collections has at least one element
    * @see [[IsEmptySeqError]]
    */
   def hasElements[T <: Traversable[_]](s: T): DValidation[T] =
     if (s.isEmpty) new IsEmptySeqError().invalid else s.valid
 
   /**
+   * Check if an [[Option]] is a [[Some]]
    * @see [[IsNoneError]]
    */
   def isSome[T <: Option[_]](s: T): DValidation[T] =
     if (s.isEmpty) new IsNoneError().invalid else s.valid
 
   /**
+   * Check if a [[Try]] is a [[Success]]
    * @see [[IsTryFailureError]]
    */
   def isTrySuccess[T <: Try[_]](s: T): DValidation[T] =
@@ -52,6 +64,8 @@ object Validator {
     else new IsNotEqualError(value, valueExpected).invalid
 
   /**
+   * Checks a > b or a >= b
+   * @param isInclusive change to >= (default >)
    * @see [[IsNotGreaterThenError]]
    */
   def isGreaterThan[T](value: T, valueMin: T, isInclusive: Boolean = false)(implicit ev: Order[T]): DValidation[T] = {
@@ -61,6 +75,8 @@ object Validator {
   }
 
   /**
+   * Checks a < b or a <= b
+   * @param isInclusive change to <= (default <)
    * @see [[IsNotGreaterThenError]]
    */
   def isSmallerThan[T](value: T, valueMax: T, isInclusive: Boolean = false)(implicit ev: Order[T]): DValidation[T] = {
