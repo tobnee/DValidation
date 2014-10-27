@@ -17,6 +17,18 @@ common validation situations including:
 
 !["Build Status"](https://travis-ci.org/tobnee/DValidation.svg?branch=master)
 
+## Getting DValidation
+DValidation is available via the Sonatype OSS repository:
+
+```
+resolvers += Resolver.sonatypeRepo("releases")
+```
+
+The current release targets the Scala 2.10.x and 2.11.x series.
+
+```
+libraryDependencies += "net.atinu" %% "dvalidation" % "0.1"
+```
 ## Basic Usage
 Lets start with this simple domain model: 
 
