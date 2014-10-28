@@ -88,7 +88,7 @@ object Validator {
   /**
    * Validate if a value is in a range of min < value < max
    * @see [[IsNotGreaterThenError]]
-   * @see [[IsNotGreaterThenError]]
+   * @see [[IsNotLowerThenError]]
    */
   def isInRange[T](value: T, min: T, max: T, inclusiveMin: Boolean = false, inclusiveMax: Boolean = false)(implicit ev: Order[T], mapError: ErrorMap[DomainError]): DValidation[T] = {
     if (ev.greaterThanOrEqual(min, max)) throw new IllegalArgumentException(s"wrong validation definition min: $min >= max: $max")
