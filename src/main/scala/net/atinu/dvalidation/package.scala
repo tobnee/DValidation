@@ -124,7 +124,12 @@ package object dvalidation {
   trait ErrorMap[-T] extends (T => DomainError)
 
   object ErrorMap {
-    implicit object Identity extends ErrorMap[DomainError] {
+
+    def mapKey[T <: DomainError](key: String): ErrorMap[T] = new ErrorMap[T] {
+      def apply(error: T) = DomainError.wrapWithKey(error, key)
+    }
+
+    implicit object DomainErrorIdentity extends ErrorMap[DomainError] {
       def apply(in: DomainError): DomainError = in
     }
   }
