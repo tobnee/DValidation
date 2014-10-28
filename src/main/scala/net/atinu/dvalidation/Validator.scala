@@ -128,8 +128,8 @@ object Validator {
    * @param v predicate which indicates if the value is valid
    * @see [[CustomValidationError]]
    */
-  def ensure[T](s: T)(key: String, args: Any*)(v: T => Boolean): DValidation[T] =
-    if (v(s)) s.success else new CustomValidationError(s, key, args.map(_.toString)).invalid
+  def ensure[T](s: T)(key: String, args: Any*)(v: T => Boolean)(implicit mapError: ErrorMap[CustomValidationError]): DValidation[T] =
+    if (v(s)) s.success else failMapped(new CustomValidationError(s, key, args.map(_.toString)))
 
   /**
    * Validate all elements of a given sequence
