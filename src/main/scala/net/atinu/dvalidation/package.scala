@@ -121,6 +121,12 @@ package object dvalidation {
     }
   }
 
+  trait ErrorMap extends (DomainError => DomainError)
+
+  implicit object Identity extends ErrorMap {
+    def apply(in: DomainError): DomainError = in
+  }
+
   implicit def domainErrorsInstances =
     new Semigroup[DomainErrors] with Equal[DomainErrors] {
       def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {

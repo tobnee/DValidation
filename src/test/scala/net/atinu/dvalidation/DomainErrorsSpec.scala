@@ -39,7 +39,7 @@ class DomainErrorsSpec extends ValidationSuite {
   }
 
   test("has a sequence extractor API") {
-    val e = DomainErrors.withErrors(
+    val e: DomainErrors = DomainErrors.withErrors(
       new IsEmptyStringError("/tests/[0]/b".asPath),
       new IsNoneError("/tests/[0]/c".asPath),
       new IsEmptyStringError("/tests/[1]/b".asPath)

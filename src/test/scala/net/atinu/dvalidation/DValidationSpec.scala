@@ -11,6 +11,13 @@ class DValidationSpec extends ValidationSuite {
     notBlank("") should beInvalidWithError(new IsEmptyStringError())
   }
 
+  test("Error can be mapped") {
+    implicit def errorMap: ErrorMap = new ErrorMap {
+      def apply(v1: DomainError): DomainError = DomainError.wrapWithKey(v1, "a.b.c")
+    }
+    notBlank("")(errorMap) should beInvalidWithErrorProps("", "a.b.c", "/")
+  }
+
   test("String with whitespace is blank") {
     notBlank(" ") should beInvalidWithError(new IsEmptyStringError())
   }

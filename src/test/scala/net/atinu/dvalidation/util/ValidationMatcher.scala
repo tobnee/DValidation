@@ -1,6 +1,7 @@
 package net.atinu.dvalidation.util
 
-import net.atinu.dvalidation.{ DomainErrors, DomainError, DValidation }
+import net.atinu.dvalidation.Path._
+import net.atinu.dvalidation.{ Path, DomainErrors, DomainError, DValidation }
 import org.scalatest.matchers.{ MatchResult, Matcher }
 
 import scalaz._
@@ -67,6 +68,22 @@ trait ValidationMatcher {
     }
   }
 
+  class ValidationHasInvalidProperties(value: Any, key: String, path: PathString, args: Seq[String]) extends Matcher[DValidation[_]] {
+    def failed(validation: DValidation[_]) = fail(s"expected domain error with properties ($value, $key, $path, $args) got $validation")
+
+    def apply(validation: DValidation[_]): MatchResult = {
+      validation match {
+        case Failure(e) =>
+          e match {
+            case DomainErrors(e1, ex @ _*) if e1.value == value && e1.msgKey == key && e1.path == path && e1.args == args =>
+              succ("")
+            case _ => failed(validation)
+          }
+        case _ => failed(validation)
+      }
+    }
+  }
+
   def beValid = new ValidationIsSuccessMatcher
 
   def beValidResult[T](value: T) = new ValidationValueIsSuccessMatcher(value)
@@ -74,6 +91,9 @@ trait ValidationMatcher {
   def beInvalid = new ValidationIsInvalidMatcher
 
   def beInvalidWithError[T <: DomainError](value: T) = new ValidationValueIsFailureMatcher(value)
+
+  def beInvalidWithErrorProps(value: Any, key: String, path: String, args: String*) =
+    new ValidationHasInvalidProperties(value, key, Path.wrap(path), args.toSeq)
 
   def beInvalidWithErrors[T <: DomainError](values: T*) = new ValidationValuesIsFailureMatcher(values.toSeq)
 

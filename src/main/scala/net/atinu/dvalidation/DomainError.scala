@@ -6,8 +6,12 @@ import scalaz.Monoid
 
 object DomainError {
 
-  def unapply(v: DomainError) =
+  def unapply(v: DomainError): Some[(Any, String, PathString, Seq[String])] =
     Some((v.value, v.msgKey, v.path, v.args))
+
+  def wrapWithKey(error: DomainError, key: String): DomainError = {
+    new ForwardingErrorWithKey(key, error)
+  }
 }
 
 /**
@@ -26,6 +30,11 @@ trait DomainError {
 
   /** arguments of the error (e.g. expected values) */
   def args: Seq[String]
+
+  /**
+   * create a new domain error with a new path, replacing old path information
+   */
+  def copyWithPath(path: PathString): DomainError
 
   /**
    * create a new domain error with a path prepended to the existing path
@@ -61,8 +70,6 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathStri
   def path = pathP
 
   def args = argsP
-
-  def copyWithPath(path: PathString): DomainError
 
   def nest(path: PathString): DomainError = {
     nestIntern(path.tail)
@@ -147,4 +154,27 @@ object CustomValidationError {
 class CustomValidationError(value: Any, key: String, args: Seq[String] = Nil, path: PathString = Path.SingleSlash) extends AbstractDomainError(value, key, path, args) {
 
   def copyWithPath(path: PathString) = new CustomValidationError(value, key, args, path)
+}
+
+class ForwardingErrorWithKey(key: String, error: DomainError) extends DomainError {
+
+  def copyWithPath(path: PathString) = copy(error.copyWithPath(path))
+
+  def value: Any = error.value
+
+  def msgKey: String = key
+
+  def nestAttribute(segment: Symbol): DomainError = copy(error.nestAttribute(segment))
+
+  def args: Seq[String] = error.args
+
+  def nestIndex(index: Int): DomainError = copy(nestIndex(index))
+
+  def path: PathString = error.path
+
+  def nest(path: PathString): DomainError = copy(nest(path))
+
+  private def copy(error: DomainError) = new ForwardingErrorWithKey(key, error)
+
+  override def toString = s"$key -> $error"
 }
