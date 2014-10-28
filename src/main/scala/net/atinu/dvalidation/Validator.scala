@@ -11,7 +11,7 @@ object Validator {
    * @param trimWhitespace remove the leading and trailing whitespace before checking
    * @see [[IsEmptyStringError]]
    */
-  def notBlank(s: String, trimWhitespace: Boolean = true)(implicit mapError: ErrorMap): DValidation[String] = {
+  def notBlank(s: String, trimWhitespace: Boolean = true)(implicit mapError: ErrorMap[IsEmptyStringError]): DValidation[String] = {
     val testStr = if (trimWhitespace) s.trim else s
     if (testStr.isEmpty) mapError(new IsEmptyStringError()).invalid else s.valid
   }

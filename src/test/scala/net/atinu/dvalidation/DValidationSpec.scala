@@ -12,8 +12,8 @@ class DValidationSpec extends ValidationSuite {
   }
 
   test("Error can be mapped") {
-    implicit def errorMap: ErrorMap = new ErrorMap {
-      def apply(v1: DomainError): DomainError = DomainError.wrapWithKey(v1, "a.b.c")
+    implicit def errorMap = new ErrorMap[IsEmptyStringError] {
+      def apply(v1: IsEmptyStringError): DomainError = DomainError.wrapWithKey(v1, "a.b.c")
     }
     notBlank("")(errorMap) should beInvalidWithErrorProps("", "a.b.c", "/")
   }
