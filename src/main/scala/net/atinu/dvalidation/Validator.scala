@@ -13,65 +13,65 @@ object Validator {
    */
   def notBlank(s: String, trimWhitespace: Boolean = true)(implicit mapError: ErrorMap[IsEmptyStringError]): DValidation[String] = {
     val testStr = if (trimWhitespace) s.trim else s
-    if (testStr.isEmpty) mapError(new IsEmptyStringError()).invalid else s.valid
+    if (testStr.isEmpty) failMapped(new IsEmptyStringError()) else s.valid
   }
 
   /**
    * Check if a value is a [[Monoid.zero]]
    * @see [[IsZeroError]]
    */
-  def notZero[T](s: T)(implicit m: Monoid[T], e: Equal[T]): DValidation[T] =
-    if (m.isMZero(s)) new IsZeroError(s).invalid else s.success
+  def notZero[T](s: T)(implicit m: Monoid[T], e: Equal[T], mapError: ErrorMap[IsZeroError]): DValidation[T] =
+    if (m.isMZero(s)) failMapped(new IsZeroError(s)) else s.success
 
   /**
    * Check if a collections has at least one element
    * @see [[IsEmptySeqError]]
    */
-  def hasElements[T <: Traversable[_]](s: T): DValidation[T] =
-    if (s.isEmpty) new IsEmptySeqError().invalid else s.valid
+  def hasElements[T <: Traversable[_]](s: T)(implicit mapError: ErrorMap[IsEmptySeqError]): DValidation[T] =
+    if (s.isEmpty) failMapped(new IsEmptySeqError()) else s.valid
 
   /**
    * Check if an [[Option]] is a [[Some]]
    * @see [[IsNoneError]]
    */
-  def isSome[T <: Option[_]](s: T): DValidation[T] =
-    if (s.isEmpty) new IsNoneError().invalid else s.valid
+  def isSome[T <: Option[_]](s: T)(implicit mapError: ErrorMap[IsNoneError]): DValidation[T] =
+    if (s.isEmpty) failMapped(new IsNoneError()) else s.valid
 
   /**
    * Check if a [[Try]] is a [[Success]]
    * @see [[IsTryFailureError]]
    */
-  def isTrySuccess[T <: Try[_]](s: T): DValidation[T] =
+  def isTrySuccess[T <: Try[_]](s: T)(implicit mapError: ErrorMap[IsTryFailureError]): DValidation[T] =
     s match {
       case value: scala.util.Success[_] => s.success
-      case scala.util.Failure(e) => new IsTryFailureError(e).invalid
+      case scala.util.Failure(e) => failMapped(new IsTryFailureError(e))
     }
 
   /**
    * Uses the == operator on AnyRef for checking equality
    * @see [[IsNotEqualError]]
    */
-  def isEqual[T](value: T, valueExpected: T): DValidation[T] =
+  def isEqual[T](value: T, valueExpected: T)(implicit mapError: ErrorMap[IsNotEqualError]): DValidation[T] =
     if (value == valueExpected) value.valid
-    else new IsNotEqualError(value, valueExpected).invalid
+    else failMapped(new IsNotEqualError(value, valueExpected))
 
   /**
    * Uses an instance of [[scalaz.Equal]] for checking equality
    * @see [[IsNotEqualError]]
    */
-  def isEqualStrict[T](value: T, valueExpected: T)(implicit ev: Equal[T]): DValidation[T] =
+  def isEqualStrict[T](value: T, valueExpected: T)(implicit ev: Equal[T], mapError: ErrorMap[IsNotEqualError]): DValidation[T] =
     if (ev.equal(value, valueExpected)) value.valid
-    else new IsNotEqualError(value, valueExpected).invalid
+    else failMapped(new IsNotEqualError(value, valueExpected))
 
   /**
    * Checks a > b or a >= b
    * @param isInclusive change to >= (default >)
    * @see [[IsNotGreaterThenError]]
    */
-  def isGreaterThan[T](value: T, valueMin: T, isInclusive: Boolean = false)(implicit ev: Order[T]): DValidation[T] = {
+  def isGreaterThan[T](value: T, valueMin: T, isInclusive: Boolean = false)(implicit ev: Order[T], mapError: ErrorMap[IsNotGreaterThenError]): DValidation[T] = {
     val isGt = if (isInclusive) ev.greaterThanOrEqual _ else ev.greaterThan _
     if (isGt(value, valueMin)) value.valid
-    else new IsNotGreaterThenError(valueMin, value, isInclusive).invalid
+    else failMapped(new IsNotGreaterThenError(valueMin, value, isInclusive))
   }
 
   /**
@@ -79,10 +79,10 @@ object Validator {
    * @param isInclusive change to <= (default <)
    * @see [[IsNotGreaterThenError]]
    */
-  def isSmallerThan[T](value: T, valueMax: T, isInclusive: Boolean = false)(implicit ev: Order[T]): DValidation[T] = {
+  def isSmallerThan[T](value: T, valueMax: T, isInclusive: Boolean = false)(implicit ev: Order[T], mapError: ErrorMap[IsNotLowerThenError]): DValidation[T] = {
     val isLt = if (isInclusive) ev.lessThanOrEqual _ else ev.lessThanOrEqual _
     if (isLt(value, valueMax)) value.valid
-    else new IsNotLowerThenError(valueMax, value, isInclusive).invalid
+    else failMapped(new IsNotLowerThenError(valueMax, value, isInclusive))
   }
 
   /**
@@ -90,7 +90,7 @@ object Validator {
    * @see [[IsNotGreaterThenError]]
    * @see [[IsNotGreaterThenError]]
    */
-  def isInRange[T](value: T, min: T, max: T, inclusiveMin: Boolean = false, inclusiveMax: Boolean = false)(implicit ev: Order[T]): DValidation[T] = {
+  def isInRange[T](value: T, min: T, max: T, inclusiveMin: Boolean = false, inclusiveMax: Boolean = false)(implicit ev: Order[T], mapError: ErrorMap[DomainError]): DValidation[T] = {
     if (ev.greaterThanOrEqual(min, max)) throw new IllegalArgumentException(s"wrong validation definition min: $min >= max: $max")
     else accumulateErrors(isSmallerThan(value, max, inclusiveMin), isGreaterThan(value, min, inclusiveMax))
   }
@@ -103,13 +103,15 @@ object Validator {
     case success => that
   }
 
+  private def failMapped[A, T <: DomainError](err: T)(implicit me: ErrorMap[T]): DValidation[A] = me(err).invalid
+
   implicit class ValidationCombinatorSyntax[T](val a: T) extends AnyVal {
-    def is_>(b: T)(implicit ev: Order[T]) = isGreaterThan(a, b)
-    def is_>=(b: T)(implicit ev: Order[T]) = isGreaterThan(a, b, isInclusive = true)
-    def is_<(b: T)(implicit ev: Order[T]) = isSmallerThan(a, b)
-    def is_<=(b: T)(implicit ev: Order[T]) = isSmallerThan(a, b, isInclusive = true)
-    def is_==(b: T) = isEqual(a, b)
-    def is_===(b: T)(implicit ev: Equal[T]) = isEqualStrict(a, b)
+    def is_>(b: T)(implicit ev: Order[T], mapError: ErrorMap[IsNotGreaterThenError]) = isGreaterThan(a, b)
+    def is_>=(b: T)(implicit ev: Order[T], mapError: ErrorMap[IsNotGreaterThenError]) = isGreaterThan(a, b, isInclusive = true)
+    def is_<(b: T)(implicit ev: Order[T], mapError: ErrorMap[IsNotLowerThenError]) = isSmallerThan(a, b)
+    def is_<=(b: T)(implicit ev: Order[T], mapError: ErrorMap[IsNotLowerThenError]) = isSmallerThan(a, b, isInclusive = true)
+    def is_==(b: T)(implicit mapError: ErrorMap[IsNotEqualError]) = isEqual(a, b)
+    def is_===(b: T)(implicit ev: Equal[T], mapError: ErrorMap[IsNotEqualError]) = isEqualStrict(a, b)
   }
 
   /**

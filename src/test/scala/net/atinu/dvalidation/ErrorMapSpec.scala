@@ -51,4 +51,10 @@ class ErrorMapSpec extends ValidationSuite {
     }
     notBlank("") should beInvalidWithError(new IsEmptyStringError())
   }
+
+  val ageValidator = Validator.template[Int] { age =>
+    val mapToAgeError = ErrorMap
+    age is_>= 18
+    ???
+  }
 }
