@@ -15,7 +15,14 @@ object LawTest extends Properties("DomainErrors") {
     value <- Gen.alphaStr
     key <- Gen.alphaStr
     args <- Gen.listOf(Gen.alphaStr)
-  } yield new CustomValidationError(value, key, args)
+    errors <- Gen.oneOf(
+      new CustomValidationError(value, key, args),
+      new IsEmptyStringError(),
+      new IsEmptySeqError())
+    errorOrForwarder <- Gen.frequency(
+      1 -> new ForwardingErrorWithKey(key, errors),
+      5 -> errors)
+  } yield errorOrForwarder
 
   def desGen: Gen[DomainErrors] = for {
     amount <- Gen.chooseNum(1, 10)
@@ -25,5 +32,7 @@ object LawTest extends Properties("DomainErrors") {
   implicit val desArb = Arbitrary(desGen)
 
   semigroup.laws[DomainErrors].check
+
+  equal.laws[DomainErrors].check
 
 }
