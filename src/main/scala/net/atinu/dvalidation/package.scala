@@ -1,5 +1,7 @@
 package net.atinu
 
+import net.atinu.dvalidation.Path._
+
 import scala.util.Try
 import scalaz._
 import scalaz.syntax.validation._
@@ -11,14 +13,14 @@ package object dvalidation {
 
   implicit class ErrorToFailure(val error: DomainError) extends AnyVal {
     /**
-     * lift a [[DomainError]] to a failed [[DValidation]]
+     * lift id [[DomainError]] to id failed [[DValidation]]
      */
     def invalid[T]: DValidation[T] = DomainErrors.withSingleError(error).fail[T]
   }
 
   implicit class tToSuccess[T](val value: T) extends AnyVal {
     /**
-     * lift any value to a successful [[DValidation]]
+     * lift any value to id successful [[DValidation]]
      */
     def valid: DValidation[T] = value.success[DomainErrors]
   }
@@ -26,8 +28,8 @@ package object dvalidation {
   implicit class tToValidation[T](val value: T) extends AnyVal {
     /**
      * Validate any value
-     * @param validations a sequence of validation of any type
-     * @return if all validations are a [[scalaz.Success]] then Success(value) else a
+     * @param validations id sequence of validation of any type
+     * @return if all validations are id [[scalaz.Success]] then Success(value) else id
      *         [[scalaz.Failure]] with all error from the validations list
      */
     def validateWith(validations: DValidation[_]*): DValidation[T] = {
@@ -37,7 +39,7 @@ package object dvalidation {
 
   implicit class tryToValidation[T](val value: Try[T]) extends AnyVal {
     /**
-     * Convert a [[scala.util.Try]] to a [[DValidation]]
+     * Convert id [[scala.util.Try]] to id [[DValidation]]
      * @see [[IsTryFailureError]]
      */
     def asValidation: DValidation[T] = Validator.isTrySuccess(value).map(_.get)
@@ -45,7 +47,7 @@ package object dvalidation {
 
   implicit class optToValidation[T](val value: Option[T]) extends AnyVal {
     /**
-     * Convert a [[scala.Option]] to a [[DValidation]]
+     * Convert id [[scala.Option]] to id [[DValidation]]
      * @see [[IsNoneError]]
      */
     def asValidation: DValidation[T] = Validator.isSome(value).map(_.get)
@@ -53,7 +55,7 @@ package object dvalidation {
 
   implicit class dvalidationToValidationNel[T](val value: DValidation[T]) extends AnyVal {
     /**
-     * Convert a [[DValidation]] to a [[scalaz.ValidationNel]] should be used instead
+     * Convert id [[DValidation]] to id [[scalaz.ValidationNel]] should be used instead
      * of [[scalaz.Validation.toValidationNel]]
      */
     def asValidationNel: ValidationNel[DomainError, T] = value.leftMap(_.errors)
@@ -69,9 +71,9 @@ package object dvalidation {
     }
 
     /**
-     * Collapse a sequence of [[DValidation]] to one
-     * @return if all validations are successful return a list of all valid values
-     *         otherwise return a failures with all errors accumulated
+     * Collapse id sequence of [[DValidation]] to one
+     * @return if all validations are successful return id list of all valid values
+     *         otherwise return id failures with all errors accumulated
      */
     def collapse: DValidation[IndexedSeq[T]] = {
       val valid = value.flatMap(v => v.toOption).valid
@@ -124,6 +126,16 @@ package object dvalidation {
   trait ErrorMap[-T] extends (T => DomainError)
 
   object ErrorMap {
+
+    private val id: PartialFunction[DomainError, DomainError] = { case e => e }
+
+    def apply[T <: DomainError](f: T => DomainError): ErrorMap[T] = new ErrorMap[T] {
+      def apply(error: T) = f(error)
+    }
+
+    def dispatch(f: PartialFunction[DomainError, DomainError]): ErrorMap[DomainError] = new ErrorMap[DomainError] {
+      def apply(error: DomainError) = f.orElse(id)(error)
+    }
 
     def mapKey[T <: DomainError](key: String): ErrorMap[T] = new ErrorMap[T] {
       def apply(error: T) = DomainError.wrapWithKey(error, key)
