@@ -1,7 +1,7 @@
 package net.atinu.dvalidation
 
 import scala.reflect.ClassTag
-import scalaz.NonEmptyList
+import scalaz.{ Equal, Semigroup, NonEmptyList }
 
 object DomainErrors {
 
@@ -17,6 +17,16 @@ object DomainErrors {
 
   def unapplySeq[A](e: DomainErrors): Option[(DomainError, List[DomainError])] =
     NonEmptyList.unapplySeq(e.errors)
+
+  implicit def domainErrorsInstances =
+    new Semigroup[DomainErrors] with Equal[DomainErrors] {
+      def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {
+        val errors = f1.errors append f2.errors
+        DomainErrors.fromNel(errors)
+      }
+
+      def equal(a1: DomainErrors, a2: DomainErrors): Boolean = a1 == a2
+    }
 }
 
 /**

@@ -1,7 +1,5 @@
 package net.atinu
 
-import net.atinu.dvalidation.Path._
-
 import scala.util.Try
 import scalaz._
 import scalaz.syntax.validation._
@@ -10,13 +8,6 @@ package object dvalidation {
 
   type DValidation[T] = Validation[DomainErrors, T]
   type DValidator[T] = T => DValidation[T]
-
-  implicit class ErrorToFailure(val error: DomainError) extends AnyVal {
-    /**
-     * lift id [[DomainError]] to id failed [[DValidation]]
-     */
-    def invalid[T]: DValidation[T] = DomainErrors.withSingleError(error).fail[T]
-  }
 
   implicit class tToSuccess[T](val value: T) extends AnyVal {
     /**
@@ -122,14 +113,4 @@ package object dvalidation {
       case (e @ Failure(_), Success(_)) => failed(e)
     }
   }
-
-  implicit def domainErrorsInstances =
-    new Semigroup[DomainErrors] with Equal[DomainErrors] {
-      def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {
-        val errors = f1.errors append f2.errors
-        DomainErrors.fromNel(errors)
-      }
-
-      def equal(a1: DomainErrors, a2: DomainErrors): Boolean = a1 == a2
-    }
 }

@@ -95,7 +95,7 @@ object Validator {
     else accumulateErrors(isSmallerThan(value, max, inclusiveMin), isGreaterThan(value, min, inclusiveMax))
   }
 
-  private def accumulateErrors[EE, AA](t: Validation[EE, AA], that: Validation[EE, AA])(implicit es: Semigroup[EE]): Validation[EE, AA] = t match {
+  private def accumulateErrors[EE, AA](t: DValidation[AA], that: DValidation[AA])(implicit es: Semigroup[DomainErrors]): DValidation[AA] = t match {
     case Failure(e) => that match {
       case Failure(e0) => Failure(es.append(e, e0))
       case success => t

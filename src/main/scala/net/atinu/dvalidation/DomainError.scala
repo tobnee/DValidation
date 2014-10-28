@@ -2,12 +2,18 @@ package net.atinu.dvalidation
 
 import net.atinu.dvalidation.Path.PathString
 
-import scalaz.Monoid
-
 object DomainError {
 
   def unapply(v: DomainError): Some[(Any, String, PathString, Seq[String])] =
     Some((v.value, v.msgKey, v.path, v.args))
+
+  implicit class ErrorToFailure(val error: DomainError) extends AnyVal {
+    import scalaz.syntax.validation._
+    /**
+     * lift id [[DomainError]] to id failed [[DValidation]]
+     */
+    def invalid[T]: DValidation[T] = DomainErrors.withSingleError(error).fail
+  }
 }
 
 /**
