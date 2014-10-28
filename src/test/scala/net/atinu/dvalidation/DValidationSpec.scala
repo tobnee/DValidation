@@ -12,10 +12,10 @@ class DValidationSpec extends ValidationSuite {
   }
 
   test("Error can be mapped") {
-    implicit def errorMap = new ErrorMap[IsEmptyStringError] {
+    implicit def errorMap: ErrorMap[IsEmptyStringError] = new ErrorMap[IsEmptyStringError] {
       def apply(v1: IsEmptyStringError): DomainError = DomainError.wrapWithKey(v1, "a.b.c")
     }
-    notBlank("")(errorMap) should beInvalidWithErrorProps("", "a.b.c", "/")
+    notBlank("") should beInvalidWithErrorProps("", "a.b.c", "/")
   }
 
   test("String with whitespace is blank") {
