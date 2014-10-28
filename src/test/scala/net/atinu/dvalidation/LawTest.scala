@@ -19,10 +19,7 @@ object LawTest extends Properties("DomainErrors") {
       new CustomValidationError(value, key, args),
       new IsEmptyStringError(),
       new IsEmptySeqError())
-    errorOrForwarder <- Gen.frequency(
-      1 -> new ForwardingErrorWithKey(key, errors),
-      5 -> errors)
-  } yield errorOrForwarder
+  } yield errors
 
   def desGen: Gen[DomainErrors] = for {
     amount <- Gen.chooseNum(1, 10)

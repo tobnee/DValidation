@@ -1,5 +1,6 @@
 package net.atinu.dvalidation
 
+import Path._
 import net.atinu.dvalidation.Validator._
 import net.atinu.dvalidation.util.ValidationSuite
 
@@ -7,7 +8,7 @@ class ErrorMapSpec extends ValidationSuite {
 
   test("Error key can be mapped") {
     implicit val errorMap = new ErrorMap[IsEmptyStringError] {
-      def apply(v1: IsEmptyStringError): DomainError = DomainError.wrapWithKey(v1, "a.b.c")
+      def apply(v1: IsEmptyStringError): DomainError = CustomValidationError.withKey(v1, "a.b.c")
     }
     notBlank("") should beInvalidWithErrorProps("", "a.b.c", "/")
   }

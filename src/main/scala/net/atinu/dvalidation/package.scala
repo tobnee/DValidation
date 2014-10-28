@@ -138,7 +138,7 @@ package object dvalidation {
     }
 
     def mapKey[T <: DomainError](key: String): ErrorMap[T] = new ErrorMap[T] {
-      def apply(error: T) = DomainError.wrapWithKey(error, key)
+      def apply(error: T) = CustomValidationError.withKey(error, key)
     }
 
     implicit object DomainErrorIdentity extends ErrorMap[DomainError] {
