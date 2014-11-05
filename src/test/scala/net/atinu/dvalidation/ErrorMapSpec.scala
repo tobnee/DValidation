@@ -1,8 +1,12 @@
 package net.atinu.dvalidation
 
+import java.time.LocalDateTime
+
 import Path._
 import net.atinu.dvalidation.Validator._
 import net.atinu.dvalidation.util.ValidationSuite
+
+import scalaz.Ordering
 
 class ErrorMapSpec extends ValidationSuite {
 
@@ -54,9 +58,15 @@ class ErrorMapSpec extends ValidationSuite {
     notBlank("") should beInvalidWithError(new IsEmptyStringError())
   }
 
-  val ageValidator = Validator.template[Int] { age =>
-    val mapToAgeError = ErrorMap
-    age is_>= 18
-    ???
+  val lDtOrder = scalaz.Order.order[LocalDateTime]((a, b) => if (a.isBefore(b)) Ordering.LT else Ordering.GT)
+  val toInPastError = ErrorMap.mapKey[IsNotLowerThenError]("dvalidaiton.inPast")
+
+  def inPast(dt: java.time.LocalDateTime) = Validator.isSmallerThan(dt, LocalDateTime.now())(lDtOrder, toInPastError)
+
+  test("Error mapping can define a custom validator") {
+    inPast(LocalDateTime.now().minusDays(1)) should beValid
+    val dateTime = LocalDateTime.now().plusDays(1)
+    val dValidation = inPast(dateTime)
+    dValidation should beInvalid
   }
 }
