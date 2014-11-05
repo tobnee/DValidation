@@ -24,10 +24,12 @@ DValidation is available via the Sonatype OSS repository:
 resolvers += Resolver.sonatypeRepo("releases")
 ```
 
-The current release targets the Scala 2.10.x and 2.11.x series.
+The current release targets the Scala 2.10.x and 2.11.x series together with
+scalaz 7.0.6 or 7.1.0.
 
 ```
 libraryDependencies += "net.atinu" %% "dvalidation" % "0.1"
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.0"
 ```
 ## Basic Usage
 Lets start with this simple domain model: 

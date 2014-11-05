@@ -16,7 +16,7 @@ resolvers ++= Seq(
 
 val scalazVersion = "7.1.0"
 
-libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion
+libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion % "provided"
 
 libraryDependencies += "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersion % "test"
 
