@@ -12,7 +12,7 @@ object DomainError {
     /**
      * lift id [[DomainError]] to id failed [[DValidation]]
      */
-    def invalid[T]: DValidation[T] = DomainErrors.withSingleError(error).fail
+    def invalid[T]: DValidation[T] = DomainErrors.withSingleError(error).failure
   }
 }
 
@@ -74,7 +74,7 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathStri
   def args = argsP
 
   def nest(path: PathString): DomainError = {
-    nestIntern(path.tail)
+    nestIntern(Path.unwrap(path).tail)
   }
 
   def nestIndex(index: Int): DomainError = {

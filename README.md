@@ -24,10 +24,12 @@ DValidation is available via the Sonatype OSS repository:
 resolvers += Resolver.sonatypeRepo("releases")
 ```
 
-The current release targets the Scala 2.10.x and 2.11.x series.
+The current release targets the Scala 2.10.x and 2.11.x series together with
+scalaz 7.0.6 or 7.1.0.
 
 ```
 libraryDependencies += "net.atinu" %% "dvalidation" % "0.1"
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.0"
 ```
 ## Basic Usage
 Lets start with this simple domain model: 
@@ -153,7 +155,8 @@ validation code.
 ```scala
 val musicianValidatorApplicative = Validator.template[Musician] { musician =>
   val stringInstrument = validSequence(musician.instruments, stringInstrumentValidator).collapse
-  val atLeastOneString = stringInstrument.flatMap(value => hasElements(value))
+  val atLeastOneString = stringInstrument.disjunction
+      .flatMap(value => hasElements(value).disjunction).validation
   val hasLegalAge = ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18)
 
   ((notBlank(musician.name) forAttribute 'name) |@|

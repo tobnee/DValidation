@@ -103,13 +103,13 @@ package object dvalidation {
 
   private[dvalidation] def validateAll[T](validations: Seq[DValidation[_]], validValue: DValidation[T]): DValidation[T] = {
 
-    def failed(e: Failure[DomainErrors, _]): DValidation[T] =
+    def failed(e: Validation[DomainErrors, _]): DValidation[T] =
       e.asInstanceOf[DValidation[T]]
 
     validations.foldLeft(validValue) {
       case (Success(_), Success(_)) => validValue
       case (Success(_), e @ Failure(_)) => failed(e)
-      case (Failure(e1), Failure(e2)) => (e1 append e2).fail
+      case (Failure(e1), Failure(e2)) => (e1 append e2).failure
       case (e @ Failure(_), Success(_)) => failed(e)
     }
   }

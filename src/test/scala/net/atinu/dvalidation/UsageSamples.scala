@@ -65,7 +65,8 @@ object UsageSamples extends App {
     import scalaz.Scalaz._
 
     val stringInstrument = validSequence(musician.instruments, stringInstrumentValidator).collapse
-    val atLeastOneString = stringInstrument.flatMap(value => hasElements(value))
+    val atLeastOneString = stringInstrument.disjunction
+      .flatMap(value => hasElements(value).disjunction).validation
     val legalAge = ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18)
 
     ((notBlank(musician.name) forAttribute 'name) |@|
@@ -85,7 +86,6 @@ object UsageSamples extends App {
   // => Success(1)
 
   val exception = new IllegalArgumentException
-  println(scala.util.Failure(exception).asValidation)
   // => Failure(DomainError(path: /, value: java.lang.IllegalArgumentException, msgKey: error.dvalidation.isTryFailue, args: ))
 
 }

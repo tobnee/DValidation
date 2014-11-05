@@ -6,6 +6,8 @@ import net.atinu.dvalidation.util.ValidationSuite
 
 class ErrorMapSpec extends ValidationSuite {
 
+  import scalaz.std.anyVal._
+
   test("Error key can be mapped") {
     implicit val errorMap = new ErrorMap[IsEmptyStringError] {
       def apply(v1: IsEmptyStringError): DomainError = CustomValidationError.withKey(v1, "a.b.c")
