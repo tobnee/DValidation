@@ -20,9 +20,11 @@ libraryDependencies += "org.scalaz" %% "scalaz-scalacheck-binding" % scalazVersi
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
-scalariformSettings
+scoverage.ScoverageSbtPlugin.instrumentSettings
 
-instrumentSettings
+org.scoverage.coveralls.CoverallsPlugin.coverallsSettings
+
+scalariformSettings
 
 publishMavenStyle := true
 

@@ -9,3 +9,5 @@ addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "0.2.1")
 resolvers += Classpaths.sbtPluginReleases
 
 addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "0.99.10.2")
+
+addSbtPlugin("org.scoverage" %% "sbt-coveralls" % "0.99.0")
