@@ -22,6 +22,8 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 
 scalariformSettings
 
+instrumentSettings
+
 publishMavenStyle := true
 
 publishTo := {
