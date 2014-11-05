@@ -153,7 +153,8 @@ validation code.
 ```scala
 val musicianValidatorApplicative = Validator.template[Musician] { musician =>
   val stringInstrument = validSequence(musician.instruments, stringInstrumentValidator).collapse
-  val atLeastOneString = stringInstrument.flatMap(value => hasElements(value))
+  val atLeastOneString = stringInstrument.disjunction
+      .flatMap(value => hasElements(value).disjunction).validation
   val hasLegalAge = ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18)
 
   ((notBlank(musician.name) forAttribute 'name) |@|

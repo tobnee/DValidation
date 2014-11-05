@@ -65,7 +65,7 @@ abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathStri
   def copyWithPath(path: PathString): DomainError
 
   def nest(path: PathString): DomainError = {
-    nestIntern(path.tail)
+    nestIntern(Path.unwrap(path).tail)
   }
 
   def nestIndex(index: Int): DomainError = {

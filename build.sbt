@@ -6,13 +6,15 @@ version := "0.2-SNAPSHOT"
 
 scalaVersion := "2.11.2"
 
+scalacOptions  ++= Seq("-unchecked", "-deprecation")
+
 crossScalaVersions := Seq("2.11.2", "2.10.4")
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )
 
-val scalazVersion = "7.0.6"
+val scalazVersion = "7.1.0"
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion
 

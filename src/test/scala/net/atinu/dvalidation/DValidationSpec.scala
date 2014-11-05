@@ -6,6 +6,7 @@ class DValidationSpec extends ValidationSuite {
 
   import net.atinu.dvalidation.Path._
   import net.atinu.dvalidation.Validator._
+  import scalaz.std.anyVal._
 
   test("String is blank") {
     notBlank("") should beInvalidWithError(new IsEmptyStringError())
