@@ -1,6 +1,10 @@
 package net.atinu.dvalidation
 
+import java.time.LocalDateTime
+
 import net.atinu.dvalidation.Validator._
+
+import scalaz.Ordering
 
 object UsageSamples extends App {
 
@@ -87,5 +91,16 @@ object UsageSamples extends App {
 
   val exception = new IllegalArgumentException
   // => Failure(DomainError(path: /, value: java.lang.IllegalArgumentException, msgKey: error.dvalidation.isTryFailue, args: ))
+
+  // custom validation
+  object DateValidation {
+    private implicit val lDtOrder = scalaz.Order.order[LocalDateTime]((a, b) =>
+      if (a.isBefore(b)) Ordering.LT else Ordering.GT)
+    private implicit val toInPastError = ErrorMap.mapKey[IsNotLowerThenError]("dvalidaiton.inPast")
+    private implicit val toInFutureError = ErrorMap.mapKey[IsNotGreaterThenError]("dvalidaiton.inFuture")
+
+    val inPast = Validator.template[LocalDateTime](_ is_< LocalDateTime.now())
+    val inFuture = Validator.template[LocalDateTime](_ is_> LocalDateTime.now())
+  }
 
 }
