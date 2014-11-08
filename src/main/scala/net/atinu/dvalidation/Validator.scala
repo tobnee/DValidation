@@ -158,6 +158,18 @@ object Validator {
   def validate[T](value: T)(cond: T => Boolean)(error: => DomainError): DValidation[T] =
     if (cond(value)) value.valid else error.invalid
 
+  def validateM[M[_], A](a: M[A])(v: DValidator[A])(implicit f: Foldable[M], m: MonadPlus[M]): DValidation[M[A]] = {
+    f.foldLeft(a, valid(m.empty[A]))((currValidation, value) => {
+      val liftedValidation = v(value).map(a => m.point(a))
+      if (currValidation.isFailure) currValidation else liftedValidation
+    })
+  }
+
+  def validateMRequired[M[_], A](a: M[A])(v: DValidator[A])(implicit f: Foldable[M], m: MonadPlus[M]): DValidation[M[A]] = {
+    if (a != m.empty[M[A]]) validateM(a)(v)
+    else new IsZeroError(a).invalid
+  }
+
   /**
    * Define a reusable [[DValidator]] function
    * {{{

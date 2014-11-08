@@ -230,4 +230,41 @@ class DValidationSpec extends ValidationSuite {
       new IsEmptyStringError("/tests/[1]/b".asPath)
     )
   }
+
+  test("validate a monad") {
+    import scalaz.std.option._
+    val opt: Option[String] = Some("1")
+    validateM(opt)(a => notBlank(a)) should beValidResult(Some("1"))
+  }
+
+  test("validate a monad zero") {
+    import scalaz.std.option._
+    val opt: Option[String] = None
+    validateM(opt)(a => notBlank(a)) should beValidResult(None)
+  }
+
+  test("validate a monad - failure") {
+    import scalaz.std.option._
+    val opt: Option[String] = Some("")
+    validateM(opt)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
+  }
+
+  test("validate required a monad") {
+    import scalaz.std.option._
+    val opt: Option[String] = Some("1")
+    validateMRequired(opt)(a => notBlank(a)) should beValidResult(Some("1"))
+  }
+
+  test("validate required a monad zero") {
+    import scalaz.std.option._
+    val opt: Option[String] = None
+    validateMRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsZeroError(None))
+  }
+
+  test("validate required a monad - failure") {
+    import scalaz.std.option._
+    val opt: Option[String] = Some("")
+    validateMRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
+  }
+
 }
