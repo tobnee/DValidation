@@ -267,4 +267,9 @@ class DValidationSpec extends ValidationSuite {
     validateMRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
   }
 
+  test("validate required a option none") {
+    val opt: Option[String] = None
+    validateOptRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsNoneError())
+  }
+
 }

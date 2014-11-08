@@ -170,6 +170,21 @@ object Validator {
     else new IsZeroError(a).invalid
   }
 
+  def validateMRequired2[M[_], A](a: M[A])(v: DValidator[A])(err: M[A] => DomainError)(implicit f: Foldable[M], m: MonadPlus[M]): DValidation[M[A]] = {
+    if (a != m.empty[M[A]]) validateM(a)(v)
+    else err(a).invalid
+  }
+
+  def validateOpt[T](a: Option[T])(v: DValidator[T]): DValidation[Option[T]] = {
+    import scalaz.std.option._
+    validateM(a)(v)
+  }
+
+  def validateOptRequired[T](a: Option[T])(v: DValidator[T]): DValidation[Option[T]] = {
+    import scalaz.std.option._
+    validateMRequired2(a)(v)(g => new IsNoneError())
+  }
+
   /**
    * Define a reusable [[DValidator]] function
    * {{{
