@@ -185,6 +185,13 @@ object Validator {
     validateMRequired2(a)(v)(g => new IsNoneError())
   }
 
+  def validateTry[T](a: Try[T])(v: DValidator[T]): DValidation[Try[T]] = {
+    a match {
+      case scala.util.Success(g) => v(g).map(scala.util.Success.apply)
+      case scala.util.Failure(e) => new IsTryFailureError(e).invalid
+    }
+  }
+
   /**
    * Define a reusable [[DValidator]] function
    * {{{

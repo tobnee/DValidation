@@ -2,6 +2,8 @@ package net.atinu.dvalidation
 
 import net.atinu.dvalidation.util.ValidationSuite
 
+import scala.util.Try
+
 class DValidationSpec extends ValidationSuite {
 
   import net.atinu.dvalidation.Path._
@@ -270,6 +272,22 @@ class DValidationSpec extends ValidationSuite {
   test("validate required a option none") {
     val opt: Option[String] = None
     validateOptRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsNoneError())
+  }
+
+  test("validate try") {
+    val t: Try[String] = Try("g")
+    validateTry(t)(a => notBlank(a)) should beValidResult(Try("g"))
+  }
+
+  test("validate try - failure content") {
+    val t: Try[String] = Try("")
+    validateTry(t)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
+  }
+
+  test("validate try - failure try") {
+    val exception = new IllegalArgumentException
+    val t: Try[String] = scala.util.Failure[String](exception)
+    validateTry(t)(a => notBlank(a)) should beInvalidWithError(new IsTryFailureError(exception))
   }
 
 }
