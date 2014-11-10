@@ -162,8 +162,8 @@ object Validator {
     validateOptBase(a, v, valid(None))
   }
 
-  def validOptRequired[T](a: Option[T])(v: DValidator[T]): DValidation[Option[T]] = {
-    validateOptBase(a, v, new IsNoneError().invalid)
+  def validOptRequired[T](a: Option[T])(v: DValidator[T])(implicit mapError: ErrorMap[IsNoneError]): DValidation[Option[T]] = {
+    validateOptBase(a, v, failMapped(new IsNoneError()))
   }
 
   private def validateOptBase[T](a: Option[T], v: DValidator[T], err: => DValidation[Option[T]]): DValidation[Option[T]] =
@@ -172,10 +172,10 @@ object Validator {
       case _ => err
     }
 
-  def validTry[T](a: Try[T])(v: DValidator[T]): DValidation[Try[T]] = {
+  def validTry[T](a: Try[T])(v: DValidator[T])(implicit mapError: ErrorMap[IsTryFailureError]): DValidation[Try[T]] = {
     a match {
       case scala.util.Success(g) => v(g).map(scala.util.Success.apply)
-      case scala.util.Failure(e) => new IsTryFailureError(e).invalid
+      case scala.util.Failure(e) => failMapped(new IsTryFailureError(e))
     }
   }
 
