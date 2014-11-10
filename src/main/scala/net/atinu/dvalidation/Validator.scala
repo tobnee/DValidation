@@ -103,6 +103,15 @@ object Validator {
     case success => that
   }
 
+  def hasSize[T[_]](value: T[_], min: Int = Int.MinValue, max: Int = Int.MaxValue)(implicit f: Foldable[T], mapError: ErrorMap[WrongSizeError]) = {
+    if (max < min) throw new IllegalArgumentException(s"wrong validation definition min: $min >= max: $max")
+    val size = f.length(value)
+    if (size <= max) {
+      if (size < min) failMapped(new IsToSmallError(min, size))
+      else valid(value)
+    } else failMapped(new IsToBigError(max, size))
+  }
+
   private def failMapped[A, T <: DomainError](err: T)(implicit me: ErrorMap[T]): DValidation[A] = me(err).invalid
 
   implicit class ValidationCombinatorSyntax[T](val a: T) extends AnyVal {

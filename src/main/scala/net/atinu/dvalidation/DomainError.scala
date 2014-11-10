@@ -149,6 +149,20 @@ class IsNotLowerThenError(valueMax: Any, value: Any, isInclusive: Boolean, path:
   def copyWithPath(path: PathString) = new IsNotLowerThenError(valueMax, value, isInclusive, path)
 }
 
+sealed trait WrongSizeError extends DomainError
+
+class IsToSmallError(valueMin: Any, value: Any, path: PathString = Path.SingleSlash)
+    extends AbstractDomainError(value, "error.dvalidation.tooSmallError", path, Seq(valueMin.toString)) with WrongSizeError {
+
+  def copyWithPath(path: PathString) = new IsToSmallError(valueMin, value, path)
+}
+
+class IsToBigError(valueMax: Any, value: Any, path: PathString = Path.SingleSlash)
+    extends AbstractDomainError(value, "error.dvalidation.tooBigError", path, Seq(valueMax.toString)) with WrongSizeError {
+
+  def copyWithPath(path: PathString) = new IsToBigError(valueMax, value, path)
+}
+
 object CustomValidationError {
   def apply(value: Any, key: String, args: String*) = new CustomValidationError(value, key, args.toSeq)
 

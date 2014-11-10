@@ -10,8 +10,11 @@ object ErrorMap {
     def apply(error: T) = f(error)
   }
 
-  def dispatch(f: PartialFunction[DomainError, DomainError]): ErrorMap[DomainError] = new ErrorMap[DomainError] {
-    def apply(error: DomainError) = f.orElse(id)(error)
+  def dispatch(f: PartialFunction[DomainError, DomainError]): ErrorMap[DomainError] =
+    dispatchFor[DomainError](f)
+
+  def dispatchFor[T <: DomainError](f: PartialFunction[T, DomainError]): ErrorMap[T] = new ErrorMap[T] {
+    def apply(error: T): DomainError = f.orElse(id)(error)
   }
 
   def mapKey[T <: DomainError](key: String): ErrorMap[T] = new ErrorMap[T] {

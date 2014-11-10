@@ -69,4 +69,12 @@ class ErrorMapSpec extends ValidationSuite {
     val dValidation = inPast(dateTime)
     dValidation should beInvalid
   }
+
+  test("Error can be mapped with a bound dispatch") {
+    import scalaz.std.list._
+    implicit def a = ErrorMap.dispatchFor[WrongSizeError] {
+      case e: IsToBigError => CustomValidationError.withKey(e, "foo")
+    }
+    hasSize(List(1, 2, 3), max = 2) should beInvalidWithErrorProps(3, "foo", "/", "2")
+  }
 }
