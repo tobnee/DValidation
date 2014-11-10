@@ -73,6 +73,17 @@ class DValidationSpec extends ValidationSuite {
     (2 is_=== 3) should beInvalidWithError(new IsNotEqualError(2, 3))
   }
 
+  test("validate is try success") {
+    val t: Try[String] = Try("g")
+    isTrySuccess(t) should beValidResult(Try("g"))
+  }
+
+  test("validate is try error") {
+    val exception = new IllegalArgumentException
+    val t: Try[String] = scala.util.Failure[String](exception)
+    isTrySuccess(t) should beInvalidWithError(new IsTryFailureError(exception))
+  }
+
   test("Validate a > b") {
     isGreaterThan(3, 2) should beValidResult(3)
     3 is_> 2 should beValidResult(3)
