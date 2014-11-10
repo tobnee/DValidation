@@ -158,34 +158,21 @@ object Validator {
   def validate[T](value: T)(cond: T => Boolean)(error: => DomainError): DValidation[T] =
     if (cond(value)) value.valid else error.invalid
 
-  def validateM[M[_], A](a: M[A])(v: DValidator[A])(implicit f: Foldable[M], m: MonadPlus[M]): DValidation[M[A]] = {
-    f.foldLeft(a, valid(m.empty[A]))((currValidation, value) => {
-      val liftedValidation = v(value).map(a => m.point(a))
-      if (currValidation.isFailure) currValidation else liftedValidation
-    })
+  def validOpt[T](a: Option[T])(v: DValidator[T]): DValidation[Option[T]] = {
+    validateOptBase(a, v, valid(None))
   }
 
-  def validateMRequired[M[_], A](a: M[A])(v: DValidator[A])(implicit f: Foldable[M], m: MonadPlus[M]): DValidation[M[A]] = {
-    if (a != m.empty[M[A]]) validateM(a)(v)
-    else new IsZeroError(a).invalid
+  def validOptRequired[T](a: Option[T])(v: DValidator[T]): DValidation[Option[T]] = {
+    validateOptBase(a, v, new IsNoneError().invalid)
   }
 
-  def validateMRequired2[M[_], A](a: M[A])(v: DValidator[A])(err: M[A] => DomainError)(implicit f: Foldable[M], m: MonadPlus[M]): DValidation[M[A]] = {
-    if (a != m.empty[M[A]]) validateM(a)(v)
-    else err(a).invalid
-  }
+  private def validateOptBase[T](a: Option[T], v: DValidator[T], err: => DValidation[Option[T]]): DValidation[Option[T]] =
+    a match {
+      case Some(value) => v(value).map(Option.apply)
+      case _ => err
+    }
 
-  def validateOpt[T](a: Option[T])(v: DValidator[T]): DValidation[Option[T]] = {
-    import scalaz.std.option._
-    validateM(a)(v)
-  }
-
-  def validateOptRequired[T](a: Option[T])(v: DValidator[T]): DValidation[Option[T]] = {
-    import scalaz.std.option._
-    validateMRequired2(a)(v)(g => new IsNoneError())
-  }
-
-  def validateTry[T](a: Try[T])(v: DValidator[T]): DValidation[Try[T]] = {
+  def validTry[T](a: Try[T])(v: DValidator[T]): DValidation[Try[T]] = {
     a match {
       case scala.util.Success(g) => v(g).map(scala.util.Success.apply)
       case scala.util.Failure(e) => new IsTryFailureError(e).invalid

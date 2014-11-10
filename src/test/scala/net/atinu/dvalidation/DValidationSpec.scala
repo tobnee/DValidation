@@ -244,61 +244,56 @@ class DValidationSpec extends ValidationSuite {
     )
   }
 
-  test("validate a monad") {
+  test("validate a option") {
     import scalaz.std.option._
     val opt: Option[String] = Some("1")
-    validateM(opt)(a => notBlank(a)) should beValidResult(Some("1"))
+    validOpt(opt)(a => notBlank(a)) should beValidResult(Some("1"))
   }
 
-  test("validate a monad zero") {
+  test("validate a option none") {
     import scalaz.std.option._
     val opt: Option[String] = None
-    validateM(opt)(a => notBlank(a)) should beValidResult(None)
+    validOpt(opt)(a => notBlank(a)) should beValidResult(None)
   }
 
-  test("validate a monad - failure") {
+  test("validate a option - failure") {
     import scalaz.std.option._
     val opt: Option[String] = Some("")
-    validateM(opt)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
+    validOpt(opt)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
   }
 
-  test("validate required a monad") {
+  test("validate required option") {
     import scalaz.std.option._
     val opt: Option[String] = Some("1")
-    validateMRequired(opt)(a => notBlank(a)) should beValidResult(Some("1"))
+    validOptRequired(opt)(a => notBlank(a)) should beValidResult(Some("1"))
   }
 
-  test("validate required a monad zero") {
+  test("validate required option none") {
     import scalaz.std.option._
     val opt: Option[String] = None
-    validateMRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsZeroError(None))
+    validOptRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsNoneError())
   }
 
-  test("validate required a monad - failure") {
+  test("validate required option - failure") {
     import scalaz.std.option._
     val opt: Option[String] = Some("")
-    validateMRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
-  }
-
-  test("validate required a option none") {
-    val opt: Option[String] = None
-    validateOptRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsNoneError())
+    validOptRequired(opt)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
   }
 
   test("validate try") {
     val t: Try[String] = Try("g")
-    validateTry(t)(a => notBlank(a)) should beValidResult(Try("g"))
+    validTry(t)(a => notBlank(a)) should beValidResult(Try("g"))
   }
 
   test("validate try - failure content") {
     val t: Try[String] = Try("")
-    validateTry(t)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
+    validTry(t)(a => notBlank(a)) should beInvalidWithError(new IsEmptyStringError())
   }
 
   test("validate try - failure try") {
     val exception = new IllegalArgumentException
     val t: Try[String] = scala.util.Failure[String](exception)
-    validateTry(t)(a => notBlank(a)) should beInvalidWithError(new IsTryFailureError(exception))
+    validTry(t)(a => notBlank(a)) should beInvalidWithError(new IsTryFailureError(exception))
   }
 
 }
