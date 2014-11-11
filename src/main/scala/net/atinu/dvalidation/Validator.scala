@@ -1,5 +1,6 @@
 package net.atinu.dvalidation
 
+import net.atinu.dvalidation.errors.{ CustomValidationError, IsNotEqualError, IsNotLowerThenError, IsNotGreaterThenError }
 import net.atinu.dvalidation.validator.{ BaseValidator, OrderValidator, SizedValidator }
 
 import scalaz.{ Equal, Order }

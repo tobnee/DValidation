@@ -1,6 +1,7 @@
 package net.atinu.dvalidation.validator
 
 import net.atinu.dvalidation._
+import net.atinu.dvalidation.errors.{ IsNotLowerThenError, IsNotGreaterThenError }
 
 import scalaz.{ Failure, Order, Semigroup }
 
@@ -9,7 +10,7 @@ trait OrderValidator extends ValidatorBase {
   /**
    * Checks a > b or a >= b
    * @param isInclusive change to >= (default >)
-   * @see [[IsNotGreaterThenError]]
+   * @see [[net.atinu.dvalidation.errors.IsNotGreaterThenError]]
    */
   def isGreaterThan[T](value: T, valueMin: T, isInclusive: Boolean = false)(implicit ev: Order[T], mapError: ErrorMap[IsNotGreaterThenError]): DValidation[T] = {
     val isGt = if (isInclusive) ev.greaterThanOrEqual _ else ev.greaterThan _

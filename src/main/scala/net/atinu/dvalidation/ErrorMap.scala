@@ -1,5 +1,7 @@
 package net.atinu.dvalidation
 
+import net.atinu.dvalidation.errors.CustomValidationError
+
 trait ErrorMap[-T] extends (T => DomainError)
 
 object ErrorMap {

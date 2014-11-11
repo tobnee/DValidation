@@ -1,13 +1,10 @@
 package net.atinu.dvalidation
 
+import net.atinu.dvalidation.errors._
 import org.scalacheck.{ Arbitrary, Gen, Properties }
 
 import scalaz._
-import Scalaz._
-import scalacheck.ScalazProperties._
-import scalacheck.ScalazArbitrary._
-import scalacheck.ScalaCheckBinding._
-import net.atinu.dvalidation._
+import scalaz.scalacheck.ScalazProperties._
 
 object LawTest extends Properties("DomainErrors") {
 

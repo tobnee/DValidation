@@ -3,6 +3,7 @@ package net.atinu.dvalidation
 import java.time.LocalDateTime
 
 import net.atinu.dvalidation.Validator._
+import net.atinu.dvalidation.errors._
 
 import scalaz.Ordering
 

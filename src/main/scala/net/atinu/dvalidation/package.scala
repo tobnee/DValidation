@@ -31,7 +31,7 @@ package object dvalidation {
   implicit class tryToValidation[T](val value: Try[T]) extends AnyVal {
     /**
      * Convert id [[scala.util.Try]] to id [[DValidation]]
-     * @see [[IsTryFailureError]]
+     * @see [[net.atinu.dvalidation.errors.IsTryFailureError]]
      */
     def asValidation: DValidation[T] = Validator.isTrySuccess(value).map(_.get)
   }
@@ -39,7 +39,7 @@ package object dvalidation {
   implicit class optToValidation[T](val value: Option[T]) extends AnyVal {
     /**
      * Convert id [[scala.Option]] to id [[DValidation]]
-     * @see [[IsNoneError]]
+     * @see [[net.atinu.dvalidation.errors.IsNoneError]]
      */
     def asValidation: DValidation[T] = Validator.isSome(value).map(_.get)
   }

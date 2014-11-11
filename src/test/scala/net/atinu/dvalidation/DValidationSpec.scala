@@ -8,6 +8,7 @@ class DValidationSpec extends ValidationSuite {
 
   import net.atinu.dvalidation.Path._
   import net.atinu.dvalidation.Validator._
+  import net.atinu.dvalidation.errors._
 
   test("String is blank") {
     notBlank("") should beInvalidWithError(new IsEmptyStringError())

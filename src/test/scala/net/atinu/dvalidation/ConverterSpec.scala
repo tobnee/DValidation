@@ -1,5 +1,6 @@
 package net.atinu.dvalidation
 
+import net.atinu.dvalidation.errors._
 import net.atinu.dvalidation.util.ValidationSuite
 import scalaz._
 import scalaz.syntax.validation._

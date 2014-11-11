@@ -2,9 +2,9 @@ package net.atinu.dvalidation
 
 import java.time.LocalDateTime
 
-import Path._
 import net.atinu.dvalidation.Validator._
 import net.atinu.dvalidation.util.ValidationSuite
+import net.atinu.dvalidation.errors._
 
 import scalaz.Ordering
 

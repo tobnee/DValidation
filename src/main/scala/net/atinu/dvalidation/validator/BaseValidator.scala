@@ -1,6 +1,7 @@
 package net.atinu.dvalidation.validator
 
 import net.atinu.dvalidation._
+import net.atinu.dvalidation.errors._
 
 import scala.util.Try
 import scalaz.{ Equal, Monoid }

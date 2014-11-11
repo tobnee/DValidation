@@ -2,6 +2,7 @@ package net.atinu.dvalidation.validator
 
 import net.atinu.dvalidation.Validator._
 import net.atinu.dvalidation._
+import net.atinu.dvalidation.errors.{ WrongSizeError, IsToSmallError, IsToBigError }
 
 import scala.annotation.implicitNotFound
 import scalaz.Foldable
