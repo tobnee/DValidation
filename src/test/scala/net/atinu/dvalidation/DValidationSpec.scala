@@ -8,7 +8,6 @@ class DValidationSpec extends ValidationSuite {
 
   import net.atinu.dvalidation.Path._
   import net.atinu.dvalidation.Validator._
-  import scalaz.std.anyVal._
 
   test("String is blank") {
     notBlank("") should beInvalidWithError(new IsEmptyStringError())
@@ -85,54 +84,66 @@ class DValidationSpec extends ValidationSuite {
   }
 
   test("Validate a > b") {
+    import scalaz.std.anyVal._
     isGreaterThan(3, 2) should beValidResult(3)
     3 is_> 2 should beValidResult(3)
   }
 
   test("Validate a > b - error") {
+    import scalaz.std.anyVal._
     isGreaterThan(2, 3) should beInvalidWithError(new IsNotGreaterThenError(3, 2, false))
   }
 
   test("Validate a >= b") {
+    import scalaz.std.anyVal._
     isGreaterThan(3, 3, isInclusive = true) should beValidResult(3)
     (3 is_>= 3) should beValidResult(3)
   }
 
   test("Validate a >= b - error") {
+    import scalaz.std.anyVal._
     isGreaterThan(2, 3, isInclusive = true) should beInvalidWithError(new IsNotGreaterThenError(3, 2, true))
   }
 
   test("Validate a < b") {
+    import scalaz.std.anyVal._
     isSmallerThan(2, 3) should beValidResult(2)
     2 is_< 3 should beValidResult(2)
   }
 
   test("Validate a < b - error") {
+    import scalaz.std.anyVal._
     isSmallerThan(3, 2) should beInvalidWithError(new IsNotLowerThenError(2, 3, false))
   }
 
   test("Validate a <= b") {
+    import scalaz.std.anyVal._
     isSmallerThan(3, 3, isInclusive = true) should beValidResult(3)
     (3 is_<= 3) should beValidResult(3)
   }
 
   test("Validate a <= b - error") {
+    import scalaz.std.anyVal._
     isSmallerThan(3, 2, isInclusive = true) should beInvalidWithError(new IsNotLowerThenError(2, 3, true))
   }
 
   test("Validate a < b < c") {
+    import scalaz.std.anyVal._
     isInRange(4, min = 1, max = 5) should beValidResult(4)
   }
 
   test("Validate a < b < c - error high") {
+    import scalaz.std.anyVal._
     isInRange(6, min = 1, max = 5) should beInvalidWithError(new IsNotLowerThenError(5, 6, false))
   }
 
   test("Validate a < b < c - error low") {
+    import scalaz.std.anyVal._
     isInRange(0, min = 1, max = 5) should beInvalidWithError(new IsNotGreaterThenError(1, 0, false))
   }
 
   test("isInRange should only work on valid ranges") {
+    import scalaz.std.anyVal._
     intercept[IllegalArgumentException] {
       isInRange(0, min = 8, max = 7)
     }
@@ -162,12 +173,10 @@ class DValidationSpec extends ValidationSuite {
   }
 
   test("validate maximum string size - failure") {
-    import scalaz.std.list._
     hasSize("ddd", max = 2) should beInvalidWithError(new IsToBigError(2, 3))
   }
 
   test("validate maximum string size") {
-    import scalaz.std.list._
     hasSize("ddd", max = 5) should beValidResult("ddd")
   }
 
