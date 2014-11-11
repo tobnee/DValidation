@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/tobnee/dvalidation.png?label=ready&title=Ready)](https://waffle.io/tobnee/dvalidation)
 # DValidation
 DValidation is a little, opinionated domain object validation toolkit on top of 
 [scalaz](https://github.com/scalaz/scalaz). While scalaz already offers the great
