@@ -2,6 +2,8 @@ package net.atinu.dvalidation
 
 import net.atinu.dvalidation.Path.PathString
 
+import scalaz.{ Show, Equal, Semigroup }
+
 object DomainError {
 
   def unapply(v: DomainError): Some[(Any, String, PathString, Seq[String])] =
@@ -14,6 +16,13 @@ object DomainError {
      */
     def invalid[T]: DValidation[T] = DomainErrors.withSingleError(error).failure
   }
+
+  implicit def domainErrorInstances =
+    new Equal[DomainError] with Show[DomainError] {
+      override def shows(f: DomainError) = f.toString
+
+      def equal(a1: DomainError, a2: DomainError): Boolean = a1 == a2
+    }
 }
 
 /**
