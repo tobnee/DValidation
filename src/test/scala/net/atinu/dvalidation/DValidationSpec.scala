@@ -159,17 +159,14 @@ class DValidationSpec extends ValidationSuite {
   }
 
   test("validate minimum size - failure") {
-    import scalaz.std.list._
     hasSize(List(1, 2, 3), min = 4) should beInvalidWithError(new IsToSmallError(4, 3))
   }
 
   test("validate maximum size") {
-    import scalaz.std.list._
     hasSize(List(1, 2, 3), max = 3) should beValidResult(List(1, 2, 3))
   }
 
   test("validate maximum size - failure") {
-    import scalaz.std.list._
     hasSize(List(1, 2, 3), max = 2) should beInvalidWithError(new IsToBigError(2, 3))
   }
 
@@ -182,7 +179,6 @@ class DValidationSpec extends ValidationSuite {
   }
 
   test("hasSize should only work on valid ranges") {
-    import scalaz.std.vector._
     intercept[IllegalArgumentException] {
       hasSize(Vector(1, 2, 3), max = 2, min = 5)
     }

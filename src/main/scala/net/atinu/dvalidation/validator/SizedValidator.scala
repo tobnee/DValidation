@@ -2,9 +2,10 @@ package net.atinu.dvalidation.validator
 
 import net.atinu.dvalidation.Validator._
 import net.atinu.dvalidation._
-import net.atinu.dvalidation.errors.{ WrongSizeError, IsToSmallError, IsToBigError }
+import net.atinu.dvalidation.errors.{ IsToBigError, IsToSmallError, WrongSizeError }
 
 import scala.annotation.implicitNotFound
+import scala.collection.GenTraversableOnce
 import scalaz.Foldable
 
 trait SizedValidator extends ValidatorBase {
@@ -28,7 +29,13 @@ trait SizedValidator extends ValidatorBase {
     def size(v: T): Int
   }
 
-  object Sized {
+  trait SizedLowPrioImplicits {
+    implicit def CollectionsAsSized[T <: GenTraversableOnce[_]] = new Sized[T] {
+      def size(v: T): Int = v.size
+    }
+  }
+
+  object Sized extends SizedLowPrioImplicits {
 
     def sizeOf[T](s: T => Int): Sized[T] = new Sized[T] {
       def size(v: T) = s(v)
