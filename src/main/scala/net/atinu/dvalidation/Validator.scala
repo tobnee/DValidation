@@ -114,7 +114,7 @@ object Validator {
   }
 
   def hasLength(value: String, min: Int = Int.MinValue, max: Int = Int.MaxValue)(mapError: ErrorMap[WrongSizeError]): DValidation[String] = {
-    hasSize(value, min, max)(StringAsSized, mapError)
+    hasSize(value, min, max)(Sized.StringAsSized, mapError)
   }
 
   private def failMapped[A, T <: DomainError](err: T)(implicit me: ErrorMap[T]): DValidation[A] = me(err).invalid
@@ -134,12 +134,19 @@ object Validator {
     def size(v: T): Int
   }
 
-  implicit def FoldableAsSized[A, T[A]](implicit f: Foldable[T]): Sized[T[A]] = new Sized[T[A]] {
-    def size(v: T[A]): Int = f.length(v)
-  }
+  object Sized {
 
-  implicit object StringAsSized extends Sized[String] {
-    def size(v: String): Int = v.length
+    def sizeOf[T](s: T => Int): Sized[T] = new Sized[T] {
+      def size(v: T) = s(v)
+    }
+
+    implicit def FoldableAsSized[A, T[A]](implicit f: Foldable[T]): Sized[T[A]] = new Sized[T[A]] {
+      def size(v: T[A]): Int = f.length(v)
+    }
+
+    implicit object StringAsSized extends Sized[String] {
+      def size(v: String): Int = v.length
+    }
   }
 
   /**
