@@ -103,9 +103,9 @@ object Validator {
     case success => that
   }
 
-  def hasSize[T[_]](value: T[_], min: Int = Int.MinValue, max: Int = Int.MaxValue)(implicit f: Foldable[T], mapError: ErrorMap[WrongSizeError]) = {
+  def hasSize[T](value: T, min: Int = Int.MinValue, max: Int = Int.MaxValue)(implicit f: Sized[T], mapError: ErrorMap[WrongSizeError]) = {
     if (max < min) throw new IllegalArgumentException(s"wrong validation definition min: $min >= max: $max")
-    val size = f.length(value)
+    val size = f.size(value)
     if (size <= max) {
       if (size < min) failMapped(new IsToSmallError(min, size))
       else valid(value)
@@ -121,6 +121,18 @@ object Validator {
     def is_<=(b: T)(implicit ev: Order[T], mapError: ErrorMap[IsNotLowerThenError]) = isSmallerThan(a, b, isInclusive = true)
     def is_==(b: T)(implicit mapError: ErrorMap[IsNotEqualError]) = isEqual(a, b)
     def is_===(b: T)(implicit ev: Equal[T], mapError: ErrorMap[IsNotEqualError]) = isEqualStrict(a, b)
+  }
+
+  trait Sized[T] {
+    def size(v: T): Int
+  }
+
+  implicit def FoldableAsSized[A, T[A]](implicit f: Foldable[T]): Sized[T[A]] = new Sized[T[A]] {
+    def size(v: T[A]): Int = f.length(v)
+  }
+
+  implicit object StringAsSized extends Sized[String] {
+    def size(v: String): Int = v.length
   }
 
   /**

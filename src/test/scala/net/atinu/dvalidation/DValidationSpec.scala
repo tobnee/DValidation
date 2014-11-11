@@ -161,6 +161,16 @@ class DValidationSpec extends ValidationSuite {
     hasSize(List(1, 2, 3), max = 2) should beInvalidWithError(new IsToBigError(2, 3))
   }
 
+  test("validate maximum string size - failure") {
+    import scalaz.std.list._
+    hasSize("ddd", max = 2) should beInvalidWithError(new IsToBigError(2, 3))
+  }
+
+  test("validate maximum string size") {
+    import scalaz.std.list._
+    hasSize("ddd", max = 5) should beValidResult("ddd")
+  }
+
   test("hasSize should only work on valid ranges") {
     import scalaz.std.vector._
     intercept[IllegalArgumentException] {
