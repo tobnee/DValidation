@@ -29,7 +29,7 @@ class ErrorMapSpec extends ValidationSuite {
       def apply(v1: IsEmptyStringError) = new CustomValidationError(v1.value, "a.b.c", v1.args, v1.path)
     }
 
-    notBlank("") should beInvalidWithError(new CustomValidationError("", "a.b.c"))
+    notBlank("")(mapEmptyString) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
   }
 
   test("Error can be mapped with a factory") {
