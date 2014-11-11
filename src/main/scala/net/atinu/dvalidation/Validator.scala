@@ -1,5 +1,6 @@
 package net.atinu.dvalidation
 
+import scala.annotation.implicitNotFound
 import scala.util.Try
 import scalaz._
 import scalaz.syntax.validation._
@@ -123,6 +124,8 @@ object Validator {
     def is_===(b: T)(implicit ev: Equal[T], mapError: ErrorMap[IsNotEqualError]) = isEqualStrict(a, b)
   }
 
+  @implicitNotFound(msg = "Cannot find implicit Validator.Sized type class for ${T}. " +
+    "You can provide your own Instance or a scalaz.Foldable")
   trait Sized[T] {
     def size(v: T): Int
   }
