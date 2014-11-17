@@ -43,7 +43,7 @@ trait SizedValidator extends ValidatorBase {
     }
 
     implicit def FoldableAsSized[A, T[A]](implicit f: Foldable[T]): Sized[T[A]] = new Sized[T[A]] {
-      def size(v: T[A]): Int = f.length(v)
+      def size(v: T[A]): Int = f.count(v)
     }
 
     implicit object StringAsSized extends Sized[String] {
