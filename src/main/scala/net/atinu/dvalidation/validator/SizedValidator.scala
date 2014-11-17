@@ -36,6 +36,7 @@ trait SizedValidator extends ValidatorBase {
   }
 
   object Sized extends SizedLowPrioImplicits {
+    import scala.language.higherKinds
 
     def sizeOf[T](s: T => Int): Sized[T] = new Sized[T] {
       def size(v: T) = s(v)

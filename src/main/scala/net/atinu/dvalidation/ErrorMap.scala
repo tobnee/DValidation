@@ -1,6 +1,7 @@
 package net.atinu.dvalidation
 
 import net.atinu.dvalidation.errors.CustomValidationError
+import scala.language.implicitConversions
 
 trait ErrorMap[-T] extends (T => DomainError)
 
@@ -26,4 +27,6 @@ object ErrorMap {
   implicit object DomainErrorIdentity extends ErrorMap[DomainError] {
     def apply(in: DomainError): DomainError = in
   }
+
+  implicit def function1ToErrorMap[T <: DomainError](f: T => DomainError): ErrorMap[T] = ErrorMap.apply(f)
 }

@@ -32,6 +32,10 @@ class ErrorMapSpec extends ValidationSuite {
     notBlank("")(mapEmptyString) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
   }
 
+  test("Error can be mapped with lifted function") {
+    notBlank("")(v1 => new CustomValidationError(v1.value, "a.b.c", v1.args, v1.path)) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
+  }
+
   test("Error can be mapped with a factory") {
     implicit val mapEmptyString = ErrorMap.apply[IsEmptyStringError](e =>
       new CustomValidationError(e.value, "a.b.c", e.args, e.path))
