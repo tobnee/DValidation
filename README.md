@@ -138,6 +138,18 @@ isInRange      |              | scalaz.Order       | isInRange(4, min = 1, max =
 hasSize        |              | dvalidation.Sized  | hasSize(List(1, 2, 3), min = 4)
 hasLength      |              | String             | hasLength("1", min = 1)
 
+## Higher Order Validators
+Validation often get applied to data which lives in a context. The state of the context now becomes a requirement
+for a successful validation. If for example an `Option[String]` is used to represent an optional academic title
+a validation expects the `String` to be non empty if the `Option` is a `Some`. To support those use cases higher
+order validators have been introduces for `Option` and `Try`. With this tool the *academic title* example can be 
+solved like this:
+
+```scala
+val academicTitle: Option[String] = Some("Dr.")
+validOptRequired(academicTitle)(title => notBlank(title)) 
+```
+
 ## Define Custom Validators
 The ensure combinator offers a simple approach how to define a custom validator.
 
