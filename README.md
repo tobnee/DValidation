@@ -126,18 +126,18 @@ Failure(DomainError(path: /instruments/[0], value: Piano, msgKey: error.dvalidat
 Validator      | Syntax       | Works for          | Example 
 -------------- | -------------|--------------------|-----------
 notBlank       |              | String             | notBlank("a") or notBlank(" ", trimWhitespace = true)
-notZero        |              | scalaz.Monoid      |  
+notZero        |              | *scalaz.Monoid*    |  
 hasElements    |              | Traversable        | hasElements(List(1,2,3))
 isSome         |              | Option             | isSome(Option(2))
 isTrySuccess   |              | Try                | isTrySuccess(Try{ "bla" })
-isEqual        | is_==        | scalaz.Order       | 1 is_== 1 
-isEqualStrict  | is_===       | scalaz.Order       | 1 is_=== 1 
-isGreaterThan  | is_> / is_>= | scalaz.Order       | 2 is_> 1 
-isSmallerThan  | is_< / is_<  | scalaz.Order       | 1 is_< 2 
-isInRange      |              | scalaz.Order       | isInRange(4, min = 1, max = 5)
-hasSize        |              | dvalidation.Sized  | hasSize(List(1, 2, 3), min = 4)
+isEqual        | is_==        | *scalaz.Order*     | 1 is_== 1 
+isEqualStrict  | is_===       | *scalaz.Order*     | 1 is_=== 1 
+isGreaterThan  | is_> / is_>= | *scalaz.Order*     | 2 is_> 1 
+isSmallerThan  | is_< / is_<  | *scalaz.Order*     | 1 is_< 2 
+isInRange      |              | *scalaz.Order*     | isInRange(4, min = 1, max = 5)
+hasSize        |              | *dvalidation.Sized*| hasSize(List(1, 2, 3), min = 4)
 hasLength      |              | String             | hasLength("1", min = 1)
-
+* *italic* types are required implicit views
 ## Higher Order Validators
 Validation often get applied to data which lives in a context. The state of the context now becomes a requirement
 for a successful validation. If for example an `Option[String]` is used to represent an optional academic title
