@@ -123,17 +123,20 @@ Failure(DomainError(path: /instruments/[0], value: Piano, msgKey: error.dvalidat
 ```
 
 ## Default Validators
-Validator      | Syntax       | Works for    | Example 
--------------- | -------------|--------------|-----------
-notBlank       |              | String       | notBlank("a") or notBlank(" ", trimWhitespace = true)  
-hasElements    |              | Traversable  | hasElements(List(1,2,3))
-isSome         |              | Option       | isSome(Option(2))
-isTrySuccess   |              | Try          | isTrySuccess(Try{ "bla" })
-isEqual        | is_==        | scalaz.Order | 1 is_== 1 
-isEqualStrict  | is_===       | scalaz.Order | 1 is_=== 1 
-isGreaterThan  | is_> / is_>= | scalaz.Order | 2 is_> 1 
-isSmallerThan  | is_< / is_<  | scalaz.Order | 1 is_< 2 
-isInRange      |              | scalaz.Order | isInRange(4, min = 1, max = 5)
+Validator      | Syntax       | Works for          | Example 
+-------------- | -------------|--------------------|-----------
+notBlank       |              | String             | notBlank("a") or notBlank(" ", trimWhitespace = true)
+notZero        |              | scalaz.Monoid      |  
+hasElements    |              | Traversable        | hasElements(List(1,2,3))
+isSome         |              | Option             | isSome(Option(2))
+isTrySuccess   |              | Try                | isTrySuccess(Try{ "bla" })
+isEqual        | is_==        | scalaz.Order       | 1 is_== 1 
+isEqualStrict  | is_===       | scalaz.Order       | 1 is_=== 1 
+isGreaterThan  | is_> / is_>= | scalaz.Order       | 2 is_> 1 
+isSmallerThan  | is_< / is_<  | scalaz.Order       | 1 is_< 2 
+isInRange      |              | scalaz.Order       | isInRange(4, min = 1, max = 5)
+hasSize        |              | dvalidation.Sized  | hasSize(List(1, 2, 3), min = 4)
+hasLength      |              | String             | hasLength("1", min = 1)
 
 ## Define Custom Validators
 The ensure combinator offers a simple approach how to define a custom validator.
