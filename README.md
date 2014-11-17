@@ -137,7 +137,8 @@ isSmallerThan  | is_< / is_<  | *scalaz.Order*     | 1 is_< 2
 isInRange      |              | *scalaz.Order*     | isInRange(4, min = 1, max = 5)
 hasSize        |              | *dvalidation.Sized*| hasSize(List(1, 2, 3), min = 4)
 hasLength      |              | String             | hasLength("1", min = 1)
-* *italic* types are required implicit views
+*italic* types are required implicit views
+
 ## Higher Order Validators
 Validation often get applied to data which lives in a context. The state of the context now becomes a requirement
 for a successful validation. If for example an `Option[String]` is used to represent an optional academic title
