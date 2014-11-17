@@ -184,6 +184,14 @@ class DValidationSpec extends ValidationSuite {
     }
   }
 
+  test("hasLength should check sizes of String") {
+    hasLength("1", min = 1) should beValidResult("1")
+  }
+
+  test("hasLength should check sizes of String - error") {
+    hasLength("1", min = 2) should beInvalidWithError(new IsToSmallError(2, 1))
+  }
+
   test("Validate if not Monoid zero") {
     import scalaz.std.anyVal._
     notZero(1) should beValidResult(1)

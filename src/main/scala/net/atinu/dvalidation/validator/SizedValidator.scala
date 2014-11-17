@@ -19,7 +19,7 @@ trait SizedValidator extends ValidatorBase {
     } else failMapped(new IsToBigError(max, size))
   }
 
-  def hasLength(value: String, min: Int = Int.MinValue, max: Int = Int.MaxValue)(mapError: ErrorMap[WrongSizeError]): DValidation[String] = {
+  def hasLength(value: String, min: Int = Int.MinValue, max: Int = Int.MaxValue)(implicit mapError: ErrorMap[WrongSizeError]): DValidation[String] = {
     hasSize(value, min, max)(Sized.StringAsSized, mapError)
   }
 
