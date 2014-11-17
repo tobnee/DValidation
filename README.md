@@ -143,6 +143,40 @@ The ensure combinator offers a simple approach how to define a custom validator.
     ensure(valueCheck)("error.dvalidation.isequal", valueExcept)(a => a == valueExcept)
 ``` 
 
+## Customize error values with ErrorMaps
+DValidation offers generic validators which are only useful when applied to a concrete class
+or use case. For example the isSmallerThan validator works for all instances with a defined `scalaz.Order`
+type class. A validation for Java 8 java.time.LocalDateTime for example would look like this:
+
+```scala
+  object DateValidation {
+    private implicit val lDtOrder = scalaz.Order.order[LocalDateTime]((a, b) =>
+      if (a.isBefore(b)) Ordering.LT else Ordering.GT)
+    
+    val inPast = Validator.template[LocalDateTime](_ is_< LocalDateTime.now())
+    val inFuture = Validator.template[LocalDateTime](_ is_> LocalDateTime.now())
+  }
+```
+
+Since `isSmallerThen` does not know for which class the validation was done, the validator can only
+yield an `IsNotLowerThenError`. This is not an optimal situation if specific translations
+have to be presented to the user or if business logic should is bound to this error scenario. 
+
+DValidation offers so called `ErrorMaps` to map the generic error value of a validator to a use case
+specific error representation. In the context of the date validation this could look like this:
+
+```scala
+  object DateValidation {
+    private implicit val lDtOrder = scalaz.Order.order[LocalDateTime]((a, b) =>
+      if (a.isBefore(b)) Ordering.LT else Ordering.GT)
+    private implicit val toInPastError = ErrorMap.mapKey[IsNotLowerThenError]("dvalidaiton.dateInPast")
+    private implicit val toInFutureError = ErrorMap.mapKey[IsNotGreaterThenError]("dvalidaiton.dateInFuture")
+
+    val inPast = Validator.template[LocalDateTime](_ is_< LocalDateTime.now())
+    val inFuture = Validator.template[LocalDateTime](_ is_> LocalDateTime.now())
+  }
+```
+
 ## Use Applicative Validation
 *scalaz Validation* offers an applicative validation style with which validations can be composed
 and mapped to a larger validation. In this aspect the applicative validation is similar to the
