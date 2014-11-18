@@ -23,8 +23,7 @@ object DomainErrors {
       override def shows(f: DomainErrors) = f.toString
 
       def append(f1: DomainErrors, f2: => DomainErrors): DomainErrors = {
-        val errors = f1.errors append f2.errors
-        DomainErrors.fromNel(errors)
+        f1 append f2
       }
 
       def equal(a1: DomainErrors, a2: DomainErrors): Boolean = a1 == a2
