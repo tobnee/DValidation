@@ -50,7 +50,13 @@ package object errors {
     }
 
     override def hashCode(): Int =
-      java.util.Arrays.asList(value, msgKey, path, args).hashCode()
+      41 * (
+        41 * (
+          41 * (
+            41 + value.hashCode
+          ) + msgKey.hashCode
+        ) + Path.unwrap(path).hashCode
+      ) + args.hashCode
   }
 
   class IsNotEqualError(valueExpected: Any, value: Any, path: PathString = Path.SingleSlash) extends AbstractDomainError(value, "error.dvalidation.notEqual", path, Seq(valueExpected.toString)) {
