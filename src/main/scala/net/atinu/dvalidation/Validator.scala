@@ -64,10 +64,22 @@ object Validator extends BaseValidator with OrderValidator with SizedValidator {
    */
   def template[T](v: DValidator[T]): DValidator[T] = v
 
+  /**
+   * Create a validation error for a given value
+   * @param key see [[DomainError.msgKey]]
+   */
   def invalid[T](value: Any, key: String) = new CustomValidationError(value, key).invalid[T]
 
+  /**
+   * Create a validation error for a given value
+   * @param key see [[DomainError.msgKey]]
+   * @param args see [[DomainError.args]]
+   */
   def invalid[T](value: Any, key: String, args: String*) = new CustomValidationError(value, key, args.toSeq).invalid[T]
 
+  /**
+   * Lift a value to a valid validation
+   */
   def valid[T](value: T): DValidation[T] = value.valid
 
   implicit class ValidationCombinatorSyntax[T](val a: T) extends AnyVal {

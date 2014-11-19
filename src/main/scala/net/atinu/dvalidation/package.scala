@@ -81,6 +81,9 @@ package object dvalidation {
       nestPathOnError(value, _.nestAttribute(attr))
     }
 
+    /**
+     * View the validation as an optional error value
+     */
     def errorView: Option[DomainErrors] = value.fold(Option.apply, _ => None)
 
     /**

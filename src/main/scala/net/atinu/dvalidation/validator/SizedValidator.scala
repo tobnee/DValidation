@@ -10,19 +10,39 @@ import scalaz.Foldable
 
 trait SizedValidator extends ValidatorBase {
 
-  def hasSize[T](value: T, min: Int = Int.MinValue, max: Int = Int.MaxValue)(implicit f: Sized[T], mapError: ErrorMap[WrongSizeError]): DValidation[T] = {
+  /**
+   * Check if the size of a value is in a specified range
+   *
+   * {{{
+   *   hasSize(List(1, 2, 3), min = 3) === Success(List(1, 2, 3))
+   * }}}
+   *
+   * @param value a value
+   * @param min a minimal size (inclusive), default [[Int.MinValue]]
+   * @param max a maximum size (inclusive), default [[Int.MaxValue]]
+   * @param s a [[Sized]] view on the validation value
+   * @return if size is outside of range then [[IsToBigError]] or [[IsToSmallError]]
+   */
+  def hasSize[T](value: T, min: Int = Int.MinValue, max: Int = Int.MaxValue)(implicit s: Sized[T], mapError: ErrorMap[WrongSizeError]): DValidation[T] = {
     if (max < min) throw new IllegalArgumentException(s"wrong validation definition min: $min >= max: $max")
-    val size = f.size(value)
+    val size = s.size(value)
     if (size <= max) {
       if (size < min) failMapped(new IsToSmallError(min, size))
       else valid(value)
     } else failMapped(new IsToBigError(max, size))
   }
 
+  /**
+   * Check the length of a String
+   * @see [[hasSize()]]
+   */
   def hasLength(value: String, min: Int = Int.MinValue, max: Int = Int.MaxValue)(implicit mapError: ErrorMap[WrongSizeError]): DValidation[String] = {
     hasSize(value, min, max)(Sized.StringAsSized, mapError)
   }
 
+  /**
+   * View on types which have a size
+   */
   @implicitNotFound(msg = "Cannot find implicit Validator.Sized type class for ${T}. " +
     "You can provide your own Instance or a scalaz.Foldable")
   trait Sized[T] {

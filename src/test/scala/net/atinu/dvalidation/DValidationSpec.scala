@@ -194,7 +194,7 @@ class DValidationSpec extends ValidationSuite {
 
   test("Validate if not Monoid zero") {
     import scalaz.std.anyVal._
-    notZero(1) should beValidResult(1)
+    notZero(1) === scalaz.Success(1)
   }
 
   test("Validate if not Monoid zero - error") {

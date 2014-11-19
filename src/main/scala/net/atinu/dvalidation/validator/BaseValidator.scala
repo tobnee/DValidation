@@ -20,13 +20,19 @@ trait BaseValidator extends ValidatorBase {
 
   /**
    * Check if a value is a [[Monoid.zero]]
+   *
+   *  {{{
+   *     import scalaz.std.anyVal._
+   * notZero(1) === scalaz.Success(1)
+   *  }}}
+   *
    * @see [[IsZeroError]]
    */
   def notZero[T](s: T)(implicit m: Monoid[T], e: Equal[T], mapError: ErrorMap[IsZeroError]): DValidation[T] =
     if (m.isMZero(s)) failMapped(new IsZeroError(s)) else s.valid
 
   /**
-   * Check if a collections has at least one element
+   * Check if a collection has at least one element
    * @see [[IsEmptySeqError]]
    */
   def hasElements[T <: Traversable[_]](s: T)(implicit mapError: ErrorMap[IsEmptySeqError]): DValidation[T] =
@@ -65,10 +71,18 @@ trait BaseValidator extends ValidatorBase {
     if (ev.equal(value, valueExpected)) value.valid
     else failMapped(new IsNotEqualError(value, valueExpected))
 
+  /**
+   * Validator for an optional value
+   * @return if parameter is Some(a) then a will be validated otherwise scalaz.Success(a)
+   */
   def validOpt[T](a: Option[T])(v: DValidator[T]): DValidation[Option[T]] = {
     validateOptBase(a, v, None.valid)
   }
 
+  /**
+   * Validator for an non optional [[scala.Option]] value
+   * @return if parameter is Some(a) then a will be validated otherwise scalaz.Failure
+   */
   def validOptRequired[T](a: Option[T])(v: DValidator[T])(implicit mapError: ErrorMap[IsNoneError]): DValidation[Option[T]] = {
     validateOptBase(a, v, failMapped(new IsNoneError()))
   }
@@ -79,6 +93,9 @@ trait BaseValidator extends ValidatorBase {
       case _ => err
     }
 
+  /**
+   * Validator for [[scala.util.Try]] values
+   */
   def validTry[T](a: Try[T])(v: DValidator[T])(implicit mapError: ErrorMap[IsTryFailureError]): DValidation[Try[T]] = {
     a match {
       case scala.util.Success(g) => v(g).map(scala.util.Success.apply)
