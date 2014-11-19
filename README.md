@@ -7,11 +7,10 @@ building, composing and transforming validations it is a very general tool.
 DValidation tries to be more opinionated with the goal to offer tools for
 common validation situations including:
 
-* A set of [validator functions](https://github.com/tobnee/DValidation#default-validators)
+* A set of built-in specific and generic [validators](#default-validators) for common validation scenarios 
 * A custom error aggregation type (DomainErrors)
 * An abstract, translation friendly error type (DomainError) 
 * A set of classes representing common error cases (IsEmptyStringError, IsNotGreaterThenError, ...)
-* A set of built-in specific and generic [validators](#default-validators) for common validation scenarios 
 * A Path abstraction for locating errors in a class hierarchy
 * [Converters](#standard-library-conversions) from other error representations
 * [Tools](#customize-error-values-with-errormaps) for creating domain specific error types
