@@ -7,7 +7,7 @@ building, composing and transforming validations it is a very general tool.
 DValidation tries to be more opinionated with the goal to offer tools for
 common validation situations including:
 
-* A set of built-in specific and generic [validators](#default-validators) for common validation scenarios 
+* A set of built-in specific and generic [validators](#default-validators) 
 * A custom error aggregation type (DomainErrors)
 * An abstract, translation friendly error type (DomainError) 
 * A set of classes representing common error cases (IsEmptyStringError, IsNotGreaterThenError, ...)
@@ -29,7 +29,7 @@ The current release targets the Scala 2.10.x and 2.11.x series together with
 scalaz 7.0.6 or 7.1.0.
 
 ```
-libraryDependencies += "net.atinu" %% "dvalidation" % "0.1"
+libraryDependencies += "net.atinu" %% "dvalidation" % "0.2"
 libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.0"
 ```
 ## Basic Usage
