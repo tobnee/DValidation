@@ -11,8 +11,10 @@ common validation situations including:
 * A custom error aggregation type (DomainErrors)
 * An abstract, translation friendly error type (DomainError) 
 * A set of classes representing common error cases (IsEmptyStringError, IsNotGreaterThenError, ...)
+* A set of built-in specific and generic [validators](#default-validators) for common validation scenarios 
 * A Path abstraction for locating errors in a class hierarchy
-* [Converters](https://github.com/tobnee/DValidation#standard-library-conversions) from other error representations
+* [Converters](#standard-library-conversions) from other error representations
+* [Tools](#customize-error-values-with-errormaps) for creating domain specific error types
 * [Utilities](https://github.com/tobnee/DValidation/blob/3abf6ed0580281799e9b20a573be714fed88d90e/src/test/scala/net/atinu/dvalidation/DValidationSpec.scala#L224-L230) to support testing validations
 
 !["Build Status"](https://travis-ci.org/tobnee/DValidation.svg?branch=master)
