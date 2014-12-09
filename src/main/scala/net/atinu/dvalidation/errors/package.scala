@@ -7,7 +7,8 @@ package object errors {
   /**
    * A base class which can be used to define a custom [[DomainError]]
    */
-  abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathString = Path.SingleSlash, argsP: Seq[String] = Nil) extends DomainError {
+  abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathString, argsP: Seq[String] = Nil) extends DomainError {
+
     def value = valueP
 
     def msgKey = msgKeyP
@@ -17,23 +18,15 @@ package object errors {
     def args = argsP
 
     def nest(path: PathString): DomainError = {
-      nestIntern(Path.unwrap(path).tail)
+      copyWithPath(this.path.nest(path))
     }
 
     def nestIndex(index: Int): DomainError = {
-      nestIntern(s"[$index]")
+      copyWithPath(path.nestIndex(index))
     }
 
     def nestAttribute(segment: Symbol): DomainError = {
-      nestIntern(segment.name)
-    }
-
-    private def nestIntern(seg: String): DomainError = {
-      val newPath = Path.unwrap(path) match {
-        case "/" => s"/$seg"
-        case _ => s"/$seg$path"
-      }
-      copyWithPath(Path.wrapInternal(newPath))
+      copyWithPath(path.nestSymbol(segment))
     }
 
     private def argsString = if (args.isEmpty) "" else s", args: ${args.mkString(",")}"
@@ -59,40 +52,40 @@ package object errors {
       ) + args.hashCode
   }
 
-  class IsNotEqualError(valueExpected: Any, value: Any, path: PathString = Path.SingleSlash) extends AbstractDomainError(value, "error.dvalidation.notEqual", path, Seq(valueExpected.toString)) {
+  class IsNotEqualError(valueExpected: Any, value: Any, path: PathString = Path./) extends AbstractDomainError(value, "error.dvalidation.notEqual", path, Seq(valueExpected.toString)) {
     def copyWithPath(path: PathString) = new IsNotEqualError(valueExpected, value, path)
   }
 
-  class IsEmptyStringError(path: PathString = Path.SingleSlash) extends AbstractDomainError("", "error.dvalidation.emptyString", path) {
+  class IsEmptyStringError(path: PathString = Path./) extends AbstractDomainError("", "error.dvalidation.emptyString", path) {
     def copyWithPath(path: PathString) = new IsEmptyStringError(path)
   }
 
-  class IsZeroError(value: Any, path: PathString = Path.SingleSlash) extends AbstractDomainError(value, "error.dvalidation.notEqual", path) {
+  class IsZeroError(value: Any, path: PathString = Path./) extends AbstractDomainError(value, "error.dvalidation.notEqual", path) {
     def copyWithPath(path: PathString) = new IsZeroError(value, path)
   }
 
-  class IsEmptySeqError(path: PathString = Path.SingleSlash) extends AbstractDomainError(Nil, "error.dvalidation.emptySeq", path) {
+  class IsEmptySeqError(path: PathString = Path./) extends AbstractDomainError(Nil, "error.dvalidation.emptySeq", path) {
 
     def copyWithPath(path: PathString) = new IsEmptySeqError(path)
   }
 
-  class IsNoneError(path: PathString = Path.SingleSlash) extends AbstractDomainError(None, "error.dvalidation.isNone", path) {
+  class IsNoneError(path: PathString = Path./) extends AbstractDomainError(None, "error.dvalidation.isNone", path) {
 
     def copyWithPath(path: PathString) = new IsNoneError(path)
   }
 
-  class IsTryFailureError(value: Throwable, path: PathString = Path.SingleSlash) extends AbstractDomainError(value, "error.dvalidation.isTryFailue", path) {
+  class IsTryFailureError(value: Throwable, path: PathString = Path./) extends AbstractDomainError(value, "error.dvalidation.isTryFailue", path) {
 
     def copyWithPath(path: PathString) = new IsTryFailureError(value, path)
   }
 
-  class IsNotGreaterThenError(valueMin: Any, value: Any, isInclusive: Boolean, path: PathString = Path.SingleSlash)
+  class IsNotGreaterThenError(valueMin: Any, value: Any, isInclusive: Boolean, path: PathString = Path./)
       extends AbstractDomainError(value, "error.dvalidation.notGreaterThen", path, Seq(valueMin.toString, isInclusive.toString)) {
 
     def copyWithPath(path: PathString) = new IsNotGreaterThenError(valueMin, value, isInclusive, path)
   }
 
-  class IsNotLowerThenError(valueMax: Any, value: Any, isInclusive: Boolean, path: PathString = Path.SingleSlash)
+  class IsNotLowerThenError(valueMax: Any, value: Any, isInclusive: Boolean, path: PathString = Path./)
       extends AbstractDomainError(value, "error.dvalidation.notSmallerThen", path, Seq(valueMax.toString, isInclusive.toString)) {
 
     def copyWithPath(path: PathString) = new IsNotLowerThenError(valueMax, value, isInclusive, path)
@@ -100,13 +93,13 @@ package object errors {
 
   sealed trait WrongSizeError extends DomainError
 
-  class IsToSmallError(valueMin: Any, value: Any, path: PathString = Path.SingleSlash)
+  class IsToSmallError(valueMin: Any, value: Any, path: PathString = Path./)
       extends AbstractDomainError(value, "error.dvalidation.tooSmallError", path, Seq(valueMin.toString)) with WrongSizeError {
 
     def copyWithPath(path: PathString) = new IsToSmallError(valueMin, value, path)
   }
 
-  class IsToBigError(valueMax: Any, value: Any, path: PathString = Path.SingleSlash)
+  class IsToBigError(valueMax: Any, value: Any, path: PathString = Path./)
       extends AbstractDomainError(value, "error.dvalidation.tooBigError", path, Seq(valueMax.toString)) with WrongSizeError {
 
     def copyWithPath(path: PathString) = new IsToBigError(valueMax, value, path)
@@ -118,7 +111,7 @@ package object errors {
     def withKey(e: DomainError, msgKey: String) = new CustomValidationError(e.value, msgKey, e.args, e.path)
   }
 
-  class CustomValidationError(value: Any, key: String, args: Seq[String] = Nil, path: PathString = Path.SingleSlash) extends AbstractDomainError(value, key, path, args) {
+  class CustomValidationError(value: Any, key: String, args: Seq[String] = Nil, path: PathString = Path./) extends AbstractDomainError(value, key, path, args) {
 
     def copyWithPath(path: PathString) = new CustomValidationError(value, key, args, path)
   }

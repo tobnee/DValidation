@@ -1,7 +1,7 @@
 package net.atinu.dvalidation
 
 import scala.reflect.ClassTag
-import scalaz.{ Show, Equal, Semigroup, NonEmptyList }
+import scalaz.{ Equal, NonEmptyList, Semigroup, Show }
 
 object DomainErrors {
 
@@ -35,6 +35,7 @@ object DomainErrors {
  * [[DomainError]].
  */
 final class DomainErrors private (e: NonEmptyList[DomainError]) {
+  import net.atinu.dvalidation.Path._
 
   def errors: NonEmptyList[DomainError] = e
 
@@ -45,6 +46,30 @@ final class DomainErrors private (e: NonEmptyList[DomainError]) {
   def errorsOfType[T <: DomainError](implicit ct: ClassTag[T]): List[T] = {
     val runtimeClass = ct.runtimeClass
     errors.list.filter(error => runtimeClass.isInstance(error)).asInstanceOf[List[T]]
+  }
+
+  def selectType[T <: DomainError](implicit ct: ClassTag[T]): Option[DomainErrors] = {
+    val runtimeClass = ct.runtimeClass
+    select(error => runtimeClass.isInstance(error))
+  }
+
+  def selectValue(v: Any): Option[DomainErrors] =
+    select(_.value == v)
+
+  def selectMsgKey(msgKey: String): Option[DomainErrors] =
+    select(_.msgKey == msgKey)
+
+  def selectPath(path: PathString): Option[DomainErrors] =
+    select(_.path == path)
+
+  def selectPathPrefix(path: PathString): Option[DomainErrors] =
+    select(error => error.path.unwrap.startsWith(path.unwrap))
+
+  def select(pred: DomainError => Boolean): Option[DomainErrors] = {
+    errors.list.filter(pred) match {
+      case x :: xs => Some(DomainErrors.apply(x, xs: _*))
+      case Nil => None
+    }
   }
 
   def map(t: DomainError => DomainError): DomainErrors =

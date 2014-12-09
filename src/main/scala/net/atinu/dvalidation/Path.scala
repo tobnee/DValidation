@@ -12,10 +12,32 @@ object Path {
   /** A tagged type for path strings (e.g. /, /a/b) */
   type PathString = String @@ Path
 
-  val SingleSlash = wrap("/")
+  val / = wrapInternal("/")
 
   implicit class StringToPath(val v: String) extends AnyVal {
     def asPath: PathString = Path.wrap(v)
+  }
+
+  implicit class PathFunctions(val path: PathString) extends AnyVal {
+
+    def unwrap = Path.unwrap(path)
+
+    def nest(v: PathString): PathString =
+      nestIntern(Path.unwrap(v).tail)
+
+    def nestIndex(idx: Int): PathString =
+      nestIntern(s"[$idx]")
+
+    def nestSymbol(s: Symbol): PathString =
+      nestIntern(s.name)
+
+    private def nestIntern(seg: String): PathString = {
+      val newPath = Path.unwrap(path) match {
+        case "/" => s"/$seg"
+        case _ => s"/$seg$path"
+      }
+      wrapInternal(newPath)
+    }
   }
 
   private lazy val r = """(/{1}+)|((/{1}+)([^/]+/{1}+|[^/]+)*?[^/]+)""".r.pattern

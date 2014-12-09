@@ -6,12 +6,62 @@ import net.atinu.dvalidation.Path._
 
 class DomainErrorsSpec extends ValidationSuite {
 
-  test("DomainErrors can be filtered by type") {
+  test("DomainErrors can be filtered by type (list)") {
     DomainErrors.withErrors(
       new IsEmptyStringError("/tests/[0]/b".asPath),
       new IsNoneError("/tests/[0]/c".asPath),
       new IsEmptyStringError("/tests/[1]/b".asPath)
     ).errorsOfType[IsNoneError] should contain(new IsNoneError("/tests/[0]/c".asPath))
+  }
+
+  test("DomainErrors can be filtered by type") {
+    DomainErrors.withErrors(
+      new IsEmptyStringError("/tests/[0]/b".asPath),
+      new IsNoneError("/tests/[0]/c".asPath),
+      new IsEmptyStringError("/tests/[1]/b".asPath)
+    ).selectType[IsNoneError] should equal(Some(DomainErrors.withSingleError(new IsNoneError("/tests/[0]/c".asPath))))
+  }
+
+  test("DomainErrors can be filtered by key") {
+    DomainErrors.withErrors(
+      new IsEmptyStringError("/tests/[0]/b".asPath),
+      new IsNoneError("/tests/[0]/c".asPath),
+      new IsEmptyStringError("/tests/[1]/b".asPath)
+    ).selectMsgKey("error.dvalidation.emptyString") should equal(Some(DomainErrors.withErrors(
+        new IsEmptyStringError("/tests/[0]/b".asPath),
+        new IsEmptyStringError("/tests/[1]/b".asPath)
+      )))
+  }
+
+  test("DomainErrors can be filtered by value") {
+    DomainErrors.withErrors(
+      new IsEmptyStringError("/tests/[0]/b".asPath),
+      new IsNoneError("/tests/[0]/c".asPath),
+      new IsEmptyStringError("/tests/[1]/b".asPath)
+    ).selectValue(None) should equal(Some(DomainErrors.withErrors(
+        new IsNoneError("/tests/[0]/c".asPath)
+      )))
+  }
+
+  test("DomainErrors can be filtered by path") {
+    DomainErrors.withErrors(
+      new IsEmptyStringError("/tests/[0]/b".asPath),
+      new IsNoneError("/tests/[0]/c".asPath),
+      new IsEmptyStringError("/tests/[1]/b".asPath)
+    ).selectPath("/tests/[0]/c".asPath) should equal(Some(DomainErrors.withErrors(
+        new IsNoneError("/tests/[0]/c".asPath)
+      )))
+  }
+
+  test("DomainErrors can be filtered by path prefix") {
+    DomainErrors.withErrors(
+      new IsEmptyStringError("/tests/[0]/b".asPath),
+      new IsNoneError("/tests/[0]/c".asPath),
+      new IsEmptyStringError("/tests/[1]/b".asPath)
+    ).selectPathPrefix("/tests/[0]".asPath) should equal(Some(DomainErrors.withErrors(
+        new IsEmptyStringError("/tests/[0]/b".asPath),
+        new IsNoneError("/tests/[0]/c".asPath)
+      )))
   }
 
   test("can map over domain errors") {
