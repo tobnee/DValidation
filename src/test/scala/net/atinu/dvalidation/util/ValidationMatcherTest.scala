@@ -44,7 +44,6 @@ class ValidationMatcherTest extends FunSuite with Matchers {
     val got = DomainErrors.withErrors(g1, g2)
 
     val res = ValidationMatcher.compareErrors(exp, got)
-    println(res.toString)
     res should not be 'OK
     res.diff should contain only (e1 -> g1, e2 -> g2)
   }

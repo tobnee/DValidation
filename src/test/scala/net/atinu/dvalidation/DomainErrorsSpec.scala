@@ -106,4 +106,20 @@ class DomainErrorsSpec extends ValidationSuite {
     key should equal("key")
     value should equal("value")
   }
+
+  test("Can sort without specifying order") {
+    val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
+    val e2 = new IsNoneError("/tests/[0]/c".asPath)
+    val e3 = new IsEmptyStringError("/tests/[1]/b".asPath)
+    val e = DomainErrors.withErrors(e2, e1, e3)
+    e.sorted.asList should contain inOrder (e1, e2, e3)
+  }
+
+  test("Can sort by specifying order") {
+    val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
+    val e2 = new IsNoneError("/tests/[0]/c".asPath)
+    val e3 = new IsNotEqualError(2, 3)
+    val e = DomainErrors.withErrors(e2, e1, e3)
+    e.sorted(DomainErrors.MsgKeyOrder).asList should contain inOrder (e1, e2, e3)
+  }
 }

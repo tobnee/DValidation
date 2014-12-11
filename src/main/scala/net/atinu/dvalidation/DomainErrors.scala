@@ -1,9 +1,11 @@
 package net.atinu.dvalidation
 
 import scala.reflect.ClassTag
-import scalaz.{ Equal, NonEmptyList, Semigroup, Show }
+import scalaz._
 
 object DomainErrors {
+  import scalaz.std.string._
+  import Path._
 
   def apply[A <: DomainError](h: A, t: A*) = new DomainErrors(NonEmptyList(h, t: _*))
 
@@ -28,6 +30,10 @@ object DomainErrors {
 
       def equal(a1: DomainErrors, a2: DomainErrors): Boolean = a1 == a2
     }
+
+  val MsgKeyOrder: Order[DomainError] = scalaz.Order.orderBy[DomainError, String](_.msgKey)
+
+  val PathOrdering: Order[DomainError] = scalaz.Order.orderBy[DomainError, String](_.path.unwrap)
 }
 
 /**
@@ -80,6 +86,15 @@ final class DomainErrors private (e: NonEmptyList[DomainError]) {
 
   def append(e: DomainErrors) =
     new DomainErrors(this.errors.append(e.errors))
+
+  def sorted(implicit o: Order[DomainError] = DomainErrors.PathOrdering) =
+    new DomainErrors(errors.sorted)
+
+  def sortBy[B](f: DomainError => B)(implicit o: Order[B]) =
+    new DomainErrors(errors.sortBy(f))
+
+  def sortWith(lt: (DomainError, DomainError) => Boolean) =
+    new DomainErrors(errors.sortWith(lt))
 
   override def toString = errors.list.mkString(",")
 
