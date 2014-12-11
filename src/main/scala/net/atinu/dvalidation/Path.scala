@@ -40,6 +40,10 @@ object Path {
     }
   }
 
+  implicit def pathStringInstances = new Equal[PathString] {
+    def equal(a1: PathString, a2: PathString): Boolean = a1.unwrap == a2.unwrap
+  }
+
   private lazy val r = """(/{1}+)|((/{1}+)([^/]+/{1}+|[^/]+)*?[^/]+)""".r.pattern
 
   def isValidPath(path: String): Boolean = r.matcher(path).matches()

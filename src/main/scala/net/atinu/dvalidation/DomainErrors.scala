@@ -42,6 +42,8 @@ object DomainErrors {
  */
 final class DomainErrors private (e: NonEmptyList[DomainError]) {
   import net.atinu.dvalidation.Path._
+  import scalaz.syntax.equal._
+  import scalaz.std.string._
 
   def errors: NonEmptyList[DomainError] = e
 
@@ -63,10 +65,10 @@ final class DomainErrors private (e: NonEmptyList[DomainError]) {
     select(_.value == v)
 
   def selectMsgKey(msgKey: String): Option[DomainErrors] =
-    select(_.msgKey == msgKey)
+    select(_.msgKey === msgKey)
 
   def selectPath(path: PathString): Option[DomainErrors] =
-    select(_.path == path)
+    select(_.path === path)
 
   def selectPathPrefix(path: PathString): Option[DomainErrors] =
     select(error => error.path.unwrap.startsWith(path.unwrap))
