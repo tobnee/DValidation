@@ -61,7 +61,7 @@ object UsageSamples extends App {
     ensure(max.age)("error.dvalidation.legalage", 18)(_ > 18) forAttribute 'age,
     hasElements(max.instruments) forAttribute 'instruments
   ).withValidations(
-      validSequence(max.instruments, stringInstrumentValidator) forAttribute 'instruments
+      validSequence(max.instruments)(stringInstrumentValidator) forAttribute 'instruments
     )
   // => Failure(DomainError(path: /instruments/[0], value: Piano, msgKey: error.dvalidation.stringinstrument, args: Keyboard))
 
@@ -69,7 +69,7 @@ object UsageSamples extends App {
   val musicianValidatorApplicative: DValidator[Musician] = Validator.template[Musician] { musician =>
     import scalaz.Scalaz._
 
-    val stringInstrument = validSequence(musician.instruments, stringInstrumentValidator).collapse
+    val stringInstrument = validSequence(musician.instruments)(stringInstrumentValidator).collapse
     val atLeastOneString = stringInstrument.disjunction
       .flatMap(value => hasElements(value).disjunction).validation
     val legalAge = ensure(musician.age)(key = "error.dvalidation.legalage", args = 18)(_ > 18)

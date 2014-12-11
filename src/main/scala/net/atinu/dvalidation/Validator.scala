@@ -32,7 +32,7 @@ object Validator extends BaseValidator with OrderValidator with SizedValidator {
    * @tparam T the element type
    * @return a sequence containing a [[DValidation]] for each input element
    */
-  def validSequence[T](seq: Traversable[T], validator: DValidator[T]): IndexedSeq[DValidation[T]] = {
+  def validSequence[T](seq: Traversable[T])(validator: DValidator[T]): IndexedSeq[DValidation[T]] = {
     seq.toIndexedSeq.zipWithIndex.map {
       case (value, idx) =>
         nestPathOnError(validator(value), _.nestIndex(idx))

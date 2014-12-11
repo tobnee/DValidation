@@ -283,7 +283,7 @@ class DValidationSpec extends ValidationSuite {
     val res = vtseq.validateWith(
       isEqual(vtseq.value, 2) forAttribute 'value
     ).withValidations(
-        validSequence(vtseq.tests, vtestValidator) forAttribute 'tests
+        validSequence(vtseq.tests)(v => vtestValidator(v)) forAttribute 'tests
       )
 
     res should beInvalidWithErrors(
