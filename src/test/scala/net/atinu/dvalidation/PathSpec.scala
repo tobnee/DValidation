@@ -5,6 +5,7 @@ import net.atinu.dvalidation.Validator._
 import net.atinu.dvalidation.errors._
 
 class PathSpec extends ValidationSuite {
+  import Path._
 
   case class VTest(a: Int, b: String, c: Option[String])
 
@@ -24,6 +25,13 @@ class PathSpec extends ValidationSuite {
     vtest.validateWith(isEqual(vtest.a, 2) forAttribute 'a forAttribute 'b) should beInvalidWithError(
       CustomValidationError(1, "error.dvalidation.isequal", args = "2")
         .nestAttribute('a).nestAttribute('b))
+  }
+
+  test("build segments from path") {
+    Path.wrap("/").segments should equal(Vector.empty)
+    Path.wrap("/a").segments should contain only PathSegment("a")
+    Path.wrap("/a/b").segments should contain inOrder (PathSegment("a"), PathSegment("b"))
+    Path.wrap("/a/[0]").segments should contain inOrder (PathSegment("a"), PathIndex(0))
   }
 
 }

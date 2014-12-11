@@ -31,6 +31,13 @@ object Path {
     def nestSymbol(s: Symbol): PathString =
       nestIntern(s.name)
 
+    def segments: Vector[Path.PathPart] = {
+      if (path == Path./) Vector.empty
+      else Path.unwrap(path)
+        .tail.split('/')
+        .map(PathPart.extract).toVector
+    }
+
     private def nestIntern(seg: String): PathString = {
       val newPath = Path.unwrap(path) match {
         case "/" => s"/$seg"
@@ -61,4 +68,17 @@ object Path {
   private[dvalidation] def wrapInternal(path: String): PathString = Tag[String, Path](path)
 
   def unwrap(path: PathString): String = Tag.unsubst[String, Id, Path](path)
+
+  object PathPart {
+    private val IndexPattern = """^\[(\d+)\]$""".r
+
+    def extract(v: String): PathPart = v match {
+      case IndexPattern(number) => PathIndex(number.toInt)
+      case segment => PathSegment(segment)
+    }
+  }
+
+  sealed abstract class PathPart
+  case class PathIndex(idx: Int) extends PathPart
+  case class PathSegment(segment: String) extends PathPart
 }
