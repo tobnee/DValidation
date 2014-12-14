@@ -12,7 +12,7 @@ object DomainErrors {
   def withSingleError(error: DomainError) = new DomainErrors(NonEmptyList.apply(error))
 
   def withErrors(errors: DomainError*) =
-    if (errors.isEmpty) throw new IllegalArgumentException("DomainErrors depend on at least one DomainError")
+    if (errors.isEmpty) throw new IllegalArgumentException("DomainErrors depends on at least one DomainError")
     else DomainErrors(errors.head, errors.tail: _*)
 
   def fromNel[T <: DomainError](nel: NonEmptyList[T]): DomainErrors = new DomainErrors(nel)
@@ -34,6 +34,22 @@ object DomainErrors {
   val MsgKeyOrder: Order[DomainError] = scalaz.Order.orderBy[DomainError, String](_.msgKey)
 
   val PathOrdering: Order[DomainError] = scalaz.Order.orderBy[DomainError, String](_.path.unwrap)
+
+  val PathDepthOrdering: Order[DomainError] =
+    scalaz.Order.order[DomainError] { (a, b) =>
+      val dOrdering = comparePathDepth(a, b)
+      if (dOrdering == Ordering.EQ) PathOrdering.apply(a, b)
+      else dOrdering
+    }
+
+  private def comparePathDepth(a: DomainError, b: DomainError) = {
+    val slash = '/'
+    val sizeA = a.path.unwrap.count(_ == slash)
+    val sizeB = b.path.unwrap.count(_ == slash)
+    if (sizeA == sizeB) Ordering.EQ
+    else if (sizeA < sizeB) Ordering.LT
+    else Ordering.GT
+  }
 }
 
 /**
@@ -89,7 +105,7 @@ final class DomainErrors private (e: NonEmptyList[DomainError]) {
   def append(e: DomainErrors) =
     new DomainErrors(this.errors.append(e.errors))
 
-  def sorted(implicit o: Order[DomainError] = DomainErrors.PathOrdering) =
+  def sorted(implicit o: Order[DomainError] = DomainErrors.PathDepthOrdering) =
     new DomainErrors(errors.sorted)
 
   def sortBy[B](f: DomainError => B)(implicit o: Order[B]) =

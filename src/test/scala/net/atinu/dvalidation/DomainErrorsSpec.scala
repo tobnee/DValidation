@@ -122,4 +122,13 @@ class DomainErrorsSpec extends ValidationSuite {
     val e = DomainErrors.withErrors(e2, e1, e3)
     e.sorted(DomainErrors.MsgKeyOrder).asList should contain inOrder (e1, e2, e3)
   }
+
+  test("Depth of path is considered in order") {
+    val e1 = new IsEmptyStringError("/uestsdfd".asPath)
+    val e2 = new IsNoneError("/tests/[0]".asPath)
+    val e3 = new IsNoneError("/tests/[0]/df".asPath)
+    val e4 = new IsNoneError("/a/b/c/d".asPath)
+    val e = DomainErrors.withErrors(e4, e2, e1, e3)
+    e.sorted.asList should contain inOrder (e1, e2, e3, e4)
+  }
 }
