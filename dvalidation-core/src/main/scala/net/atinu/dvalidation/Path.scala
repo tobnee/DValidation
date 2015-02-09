@@ -78,7 +78,13 @@ object Path {
     }
   }
 
-  sealed abstract class PathPart
-  case class PathIndex(idx: Int) extends PathPart
-  case class PathSegment(segment: String) extends PathPart
+  sealed abstract class PathPart {
+    def value: String
+  }
+  case class PathIndex(idx: Int) extends PathPart {
+    def value = idx.toString
+  }
+  case class PathSegment(segment: String) extends PathPart {
+    def value = segment.toString
+  }
 }

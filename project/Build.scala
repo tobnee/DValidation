@@ -48,6 +48,8 @@ object Build {
       resolvers ++= Seq(
         Resolver.sonatypeRepo("releases")
       )
+    ).settings(
+      libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
     ).settings(RepoSettings: _*)
      .settings(scalariformSettings: _*)
 
