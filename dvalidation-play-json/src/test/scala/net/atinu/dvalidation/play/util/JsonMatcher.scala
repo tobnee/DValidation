@@ -1,11 +1,11 @@
 package net.atinu.dvalidation.play.util
 
 import org.scalatest.matchers.{ MatchResult, Matcher }
-import play.api.libs.json.JsObject
+import play.api.libs.json.{ Reads, JsObject }
 
 trait JsonMatcher {
 
-  def containKeyValue(kv: (String, String)) = new KeyValueMatcher(kv)
+  def containKeyValue[T: Reads](kv: (String, T)) = new KeyValueMatcher(kv)
 
   def containKeyValues(k: String, v: String*) = new KeyValuesMatcher(k, v.toSeq)
 
@@ -13,12 +13,12 @@ trait JsonMatcher {
 
 }
 
-class KeyValueMatcher(expect: (String, String)) extends Matcher[JsObject] {
+class KeyValueMatcher[T: Reads](expect: (String, T)) extends Matcher[JsObject] {
 
   def apply(left: JsObject): MatchResult = {
     val (k, v) = expect
-    val res = (left \ k).asOpt[String].exists(_ == v)
-    MatchResult(res, s"$left does not contain the key: $k // value $v", "works")
+    val res = (left \ k).asOpt[T].exists(_ == v)
+    MatchResult(res, s"$left does not contain the key: $k // value: $v", "works")
   }
 }
 
