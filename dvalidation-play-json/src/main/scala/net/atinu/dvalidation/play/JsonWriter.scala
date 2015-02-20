@@ -5,10 +5,12 @@ import net.atinu.dvalidation.play.JsonConf._
 
 import play.api.libs.json._
 
+import scalaz.{ Success, Failure, Validation }
+
 object JsonWriter {
 
-  def renderValidation(validation: DValidation[_]): JsArray =
-    new JsonWriter().renderValidation(validation)
+  def renderValidation[T: Writes](validation: DValidation[T], errorRootName: String = "errors"): JsValue =
+    new JsonWriter().renderValidation(validation, errorRootName)
 
   def renderSingle(errors: DomainError): JsObject = {
     new JsonWriter().renderSingle(errors)
@@ -16,6 +18,10 @@ object JsonWriter {
 
   def renderAll(errors: DomainErrors): JsArray = {
     new JsonWriter().renderAll(errors)
+  }
+
+  def toJsonValidation[T: Writes](validation: DValidation[T]): Validation[JsArray, JsValue] = {
+    new JsonWriter().toJsonValidation(validation)
   }
 }
 
@@ -35,7 +41,6 @@ class JsonWriter(
     value: ValuePrinter = JsonConf.ToStringValue,
     args: ArgsPrinter = JsonConf.ArgsAsArray,
     msg: MsgPrinter = JsonConf.NoMsgPrinter) {
-
 
   /**
    * For each [[DomainError]] a corresponding entry in the [[JsArray]]
@@ -60,6 +65,26 @@ class JsonWriter(
   /**
    * Given a [[scalaz.Failure]] return an empty [[JsArray]] otherwise the result of [[renderAll()]]
    */
-  def renderValidation(validation: DValidation[_]): JsArray =
+  def renderFailure(validation: DValidation[_]): JsArray =
     validation.errorView.map(renderAll).getOrElse(JsArray(Nil))
+
+  /**
+   * Given a [[scalaz.Failure]] return [[renderAll()]] within a JSON object or a JSON representation of the value object
+   * @param errorRootName name of the root note containing the error values
+   * @tparam T domain validation value type
+   */
+  def renderValidation[T: Writes](validation: DValidation[T], errorRootName: String = "errors"): JsValue = {
+    validation match {
+      case Failure(a) => Json.obj(errorRootName -> renderAll(a))
+      case Success(b) => Json.toJson(b)
+    }
+  }
+
+  /**
+   * Transforms a [[DValidation]] into a validation with a JSON error and value type
+   * @tparam T type of the [[DValidation]] value
+   */
+  def toJsonValidation[T: Writes](validation: DValidation[T]): Validation[JsArray, JsValue] = {
+    validation.bimap(renderAll, value => Json.toJson(value))
+  }
 }

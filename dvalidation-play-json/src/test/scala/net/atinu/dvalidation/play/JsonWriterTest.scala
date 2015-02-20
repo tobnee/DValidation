@@ -8,6 +8,8 @@ import net.atinu.dvalidation.play.JsonConf.{ MappedValue, TranslationMessagePrin
 import net.atinu.dvalidation.play.util.JsonMatcher
 import org.scalatest.{ FunSuite, Matchers }
 
+import scalaz.{ Success, Validation }
+
 class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
 
   test("Should render a single error to json") {
@@ -25,6 +27,21 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
     val single = new JsonWriter(field = JsonConf.DefaultField).renderSingle(e1)
     single should containKeyValue("field" -> "b")
+  }
+
+  test("Should render a failed validation") {
+    import net.atinu.dvalidation.Path._
+    val e1: DValidation[String] =
+      Validation.failure(DomainErrors.withSingleError(new IsEmptyStringError("/tests/[0]/b".asPath)))
+    val res = JsonWriter.renderValidation(e1)
+    (res \ "errors").asOpt[JsArray] should not be 'empty
+    (res \ "errors").as[JsArray].value.head.as[JsObject] should containKeyValue("value" -> "")
+  }
+
+  test("Should render a sucessful validation") {
+    val e1: DValidation[String] = Success("abc")
+    val res = JsonWriter.renderValidation(e1)
+    res.as[String] should equal("abc")
   }
 
   test("Should render a translated value") {
