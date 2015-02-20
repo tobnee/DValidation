@@ -9,7 +9,7 @@ import scalaz.{ Success, Failure, Validation }
 
 object JsonWriter {
 
-  val default = new JsonWriter()
+  val default: JsonWriter = new JsonWriter()
 }
 
 /**
@@ -75,5 +75,5 @@ class JsonWriter(
     validation.bimap(renderAll, value => Json.toJson(value))
   }
 
-  def asWrites = DomainErrorWrites.customDomainErrorWrites(this)
+  def asWrites: Writes[DomainError] = DomainErrorWrites.customDomainErrorWrites(this)
 }
