@@ -9,7 +9,15 @@ import scalaz.{ Success, Failure, Validation }
 
 object JsonWriter {
 
-  val default: JsonWriter = new JsonWriter()
+  def apply(
+    path: PathPrinter = JsonConf.SlashSeparatedPath,
+    field: FieldPrinter = JsonConf.NoFieldPrinter,
+    msgKey: MsgKeyPrinter = JsonConf.DefaultMsgKey,
+    value: ValuePrinter = JsonConf.ToStringValue,
+    args: ArgsPrinter = JsonConf.ArgsAsArray,
+    msg: MsgPrinter = JsonConf.NoMsgPrinter) = new JsonWriter(path, field, msgKey, value, args, msg)
+
+  val default: JsonWriter = apply()
 }
 
 /**
@@ -22,12 +30,12 @@ object JsonWriter {
  * @param msg represent a [[DomainError]] as string
  */
 class JsonWriter(
-    path: PathPrinter = JsonConf.SlashSeparatedPath,
-    field: FieldPrinter = JsonConf.NoFieldPrinter,
-    msgKey: MsgKeyPrinter = JsonConf.DefaultMsgKey,
-    value: ValuePrinter = JsonConf.ToStringValue,
-    args: ArgsPrinter = JsonConf.ArgsAsArray,
-    msg: MsgPrinter = JsonConf.NoMsgPrinter) {
+    path: PathPrinter,
+    field: FieldPrinter,
+    msgKey: MsgKeyPrinter,
+    value: ValuePrinter,
+    args: ArgsPrinter,
+    msg: MsgPrinter) {
 
   /**
    * For each [[DomainError]] a corresponding entry in the [[JsArray]]

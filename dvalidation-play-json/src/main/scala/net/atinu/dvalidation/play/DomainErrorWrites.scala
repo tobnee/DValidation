@@ -5,7 +5,7 @@ import play.api.libs.json.{ Json, JsArray, JsValue, Writes }
 
 object DomainErrorWrites extends DomainErrorWrites {
 
-  def defaultDomainErrorWrites = customDomainErrorWrites(new JsonWriter())
+  def defaultDomainErrorWrites = JsonWriter.default.asWrites
 
   def defaultDomainErrorsWrites(implicit w: Writes[DomainError]) = new Writes[DomainErrors] {
     def writes(errors: DomainErrors): JsValue = {

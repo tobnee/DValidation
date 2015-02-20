@@ -25,7 +25,7 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
   test("Should render a field of a single value") {
     import net.atinu.dvalidation.Path._
     val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
-    val single = new JsonWriter(field = JsonConf.DefaultField).renderSingle(e1)
+    val single = JsonWriter(field = JsonConf.DefaultField).renderSingle(e1)
     single should containKeyValue("field" -> "b")
   }
 
@@ -48,14 +48,14 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     import net.atinu.dvalidation.Path._
     val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
     val translator = new TranslationMessagePrinter("de", (error, lang) => s"error message $lang ${error.msgKey}")
-    val single = new JsonWriter(msg = translator).renderSingle(e1)
+    val single = JsonWriter(msg = translator).renderSingle(e1)
     single should containKeyValue("msg" -> "error message de error.dvalidation.emptyString")
   }
 
   test("Should render path as array") {
     import net.atinu.dvalidation.Path._
     val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
-    val single = new JsonWriter(path = JsonConf.PathAsArray).renderSingle(e1)
+    val single = JsonWriter(path = JsonConf.PathAsArray).renderSingle(e1)
     single should containKeyValue("path" -> Json.arr("tests", "0", "b"))
   }
 
@@ -68,20 +68,20 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     val mapper: MappedValue = JsonConf.mappedValue {
       case None => JsObject(Nil)
     }
-    val error = new JsonWriter(value = mapper).renderSingle(new IsNoneError())
+    val error = JsonWriter(value = mapper).renderSingle(new IsNoneError())
     error should containKeyValue("value" -> JsObject(Nil))
   }
 
   test("Mapped value renderer can have a toString backup") {
     val mapper = JsonConf.mappedValue { case e: String => JsObject(Nil) }.withToStringDefault
-    val error = new JsonWriter(value = mapper).renderSingle(new IsNoneError())
+    val error = JsonWriter(value = mapper).renderSingle(new IsNoneError())
     error should containKeyValue("value" -> "None")
   }
 
   test("Mapped value renderer can map values to JSON given a Writes") {
     implicit val writes: Writes[IllegalArgumentException] = Writes.apply(e => JsString(e.getMessage))
     val mapper = JsonConf.mapValueToJson[IllegalArgumentException]
-    val error = new JsonWriter(value = mapper).renderSingle(new IsTryFailureError(new IllegalArgumentException("foo")))
+    val error = JsonWriter(value = mapper).renderSingle(new IsTryFailureError(new IllegalArgumentException("foo")))
     error should containKeyValue("value" -> "foo")
   }
 
@@ -90,8 +90,8 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     val mapper1 = JsonConf.mapValueToJson[IllegalArgumentException]
     val mapper2 = JsonConf.mappedValue { case None => JsObject(Nil) }
     val mapper = mapper1 orElse mapper2
-    val error = new JsonWriter(value = mapper).renderSingle(new IsTryFailureError(new IllegalArgumentException("foo")))
-    val error2 = new JsonWriter(value = mapper).renderSingle(new IsNoneError())
+    val error = JsonWriter(value = mapper).renderSingle(new IsTryFailureError(new IllegalArgumentException("foo")))
+    val error2 = JsonWriter(value = mapper).renderSingle(new IsNoneError())
     error should containKeyValue("value" -> "foo")
     error2 should containKeyValue("value" -> JsObject(Nil))
   }
