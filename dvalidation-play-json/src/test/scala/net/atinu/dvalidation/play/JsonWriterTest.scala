@@ -15,7 +15,7 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
   test("Should render a single error to json") {
     import net.atinu.dvalidation.Path._
     val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
-    val single = JsonWriter.renderSingle(e1)
+    val single = JsonWriter.default.renderSingle(e1)
     single should containKeyValue("path" -> "/tests/[0]/b")
     single should containKeyValue("msgKey" -> "error.dvalidation.emptyString")
     single should containKeyValue("value" -> "")
@@ -33,14 +33,14 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     import net.atinu.dvalidation.Path._
     val e1: DValidation[String] =
       Validation.failure(DomainErrors.withSingleError(new IsEmptyStringError("/tests/[0]/b".asPath)))
-    val res = JsonWriter.renderValidation(e1)
+    val res = JsonWriter.default.renderValidation(e1)
     (res \ "errors").asOpt[JsArray] should not be 'empty
     (res \ "errors").as[JsArray].value.head.as[JsObject] should containKeyValue("value" -> "")
   }
 
   test("Should render a sucessful validation") {
     val e1: DValidation[String] = Success("abc")
-    val res = JsonWriter.renderValidation(e1)
+    val res = JsonWriter.default.renderValidation(e1)
     res.as[String] should equal("abc")
   }
 
@@ -60,7 +60,7 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
   }
 
   test("Default value renderer returns None as string") {
-    val error = JsonWriter.renderSingle(new IsNoneError())
+    val error = JsonWriter.default.renderSingle(new IsNoneError())
     error should containKeyValue("value" -> "None")
   }
 

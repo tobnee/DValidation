@@ -9,20 +9,7 @@ import scalaz.{ Success, Failure, Validation }
 
 object JsonWriter {
 
-  def renderValidation[T: Writes](validation: DValidation[T], errorRootName: String = "errors"): JsValue =
-    new JsonWriter().renderValidation(validation, errorRootName)
-
-  def renderSingle(errors: DomainError): JsObject = {
-    new JsonWriter().renderSingle(errors)
-  }
-
-  def renderAll(errors: DomainErrors): JsArray = {
-    new JsonWriter().renderAll(errors)
-  }
-
-  def toJsonValidation[T: Writes](validation: DValidation[T]): Validation[JsArray, JsValue] = {
-    new JsonWriter().toJsonValidation(validation)
-  }
+  val default = new JsonWriter()
 }
 
 /**
@@ -87,4 +74,6 @@ class JsonWriter(
   def toJsonValidation[T: Writes](validation: DValidation[T]): Validation[JsArray, JsValue] = {
     validation.bimap(renderAll, value => Json.toJson(value))
   }
+
+  def asWrites = DomainErrorWrites.customDomainErrorWrites(this)
 }
