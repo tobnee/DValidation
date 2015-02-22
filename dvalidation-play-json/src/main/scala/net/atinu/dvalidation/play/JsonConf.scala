@@ -1,6 +1,6 @@
 package net.atinu.dvalidation.play
 
-import net.atinu.dvalidation.DomainError
+import net.atinu.dvalidation.{ DomainErrorWithExpectation, DomainError }
 import net.atinu.dvalidation.play.JsonConf.MappedValue.ValueMapper
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
@@ -15,7 +15,7 @@ object JsonConf {
 
   protected trait PrinterFactory {
     def key: String
-    def apply(v: JsValueWrapper) = Json.obj(key -> v)
+    def apply(v: JsValueWrapper): JsObject = Json.obj(key -> v)
   }
 
   trait NoPrinter extends JsonPrinter {
@@ -87,14 +87,34 @@ object JsonConf {
 
   trait ValuePrinter extends JsonPrinter
 
+  object ExtValuePrinter extends PrinterFactory {
+    val key = "expected"
+  }
+
+  trait ExtValuePrinter extends ValuePrinter {
+    def apply(error: DomainError): JsObject = error match {
+      case e: DomainErrorWithExpectation => applyValue(error) ++ applyExpected(e)
+      case e => applyValue(e)
+    }
+
+    def applyExpected(error: DomainErrorWithExpectation): JsObject =
+      ExtValuePrinter(applyContent(error.expected))
+
+    def applyValue(error: DomainError): JsObject
+
+    def applyContent(v: Any): JsValueWrapper
+  }
+
   object NoValue extends ValuePrinter with NoPrinter
 
   /**
    * given a [[DomainError.value]] x -> a string x.toString
    */
-  object ToStringValue extends ValuePrinter {
-    def apply(error: DomainError): JsObject =
-      ValuePrinter(error.value.toString)
+  object ToStringValue extends ExtValuePrinter {
+    def applyValue(error: DomainError): JsObject =
+      ValuePrinter(applyContent(error.value))
+
+    def applyContent(v: Any): JsValueWrapper = v.toString
   }
 
   def mappedValue(mapper: ValueMapper): MappedValue = {
@@ -118,14 +138,14 @@ object JsonConf {
    * Translate a [[DomainError.value]] to a Json Representation depending on the type or
    * value of the error value
    */
-  class MappedValue(private val mapper: ValueMapper) extends ValuePrinter {
+  class MappedValue(private val mapper: ValueMapper) extends ExtValuePrinter {
 
     /**
      * build a Json representation for a [[DomainError.value]]
      * @throws MatchError given a non defined mapping
      */
-    def apply(error: DomainError): JsObject = {
-      ValuePrinter(mapper.apply(error.value))
+    def applyValue(error: DomainError): JsObject = {
+      ValuePrinter(applyContent(error.value))
     }
 
     /**
@@ -143,6 +163,8 @@ object JsonConf {
       val pf: ValueMapper = { case e => JsString(e.toString) }
       new MappedValue(mapper.orElse(pf))
     }
+
+    def applyContent(v: Any): JsValueWrapper = mapper.apply(v)
   }
 
   object ArgsPrinter extends PrinterFactory {

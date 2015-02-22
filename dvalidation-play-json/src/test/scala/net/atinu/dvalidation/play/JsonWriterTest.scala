@@ -3,7 +3,7 @@ package net.atinu.dvalidation.play
 import _root_.play.api.libs.json._
 import net.atinu.dvalidation.Validator._
 import net.atinu.dvalidation._
-import net.atinu.dvalidation.errors.{ IsTryFailureError, IsNoneError, IsEmptyStringError }
+import net.atinu.dvalidation.errors.{ IsToSmallError, IsTryFailureError, IsNoneError, IsEmptyStringError }
 import net.atinu.dvalidation.play.JsonConf.{ MappedValue, TranslationMessagePrinter }
 import net.atinu.dvalidation.play.util.JsonMatcher
 import org.scalatest.{ FunSuite, Matchers }
@@ -57,6 +57,12 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
     val single = JsonWriter(path = JsonConf.PathAsArray).renderSingle(e1)
     single should containKeyValue("path" -> Json.arr("tests", "0", "b"))
+  }
+
+  test("Should render expected values") {
+    val e1 = new IsToSmallError(2, 1)
+    val single = JsonWriter.default.renderSingle(e1)
+    single should containKeyValue("expected" -> "2")
   }
 
   test("Default value renderer returns None as string") {

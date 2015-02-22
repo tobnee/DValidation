@@ -70,3 +70,11 @@ trait DomainError {
   def nestIndex(index: Int): DomainError
 }
 
+trait DomainErrorWithExpectation extends DomainError {
+
+  /**
+   * Expected state, prevented a successful validation
+   */
+  def expected: Any
+}
+

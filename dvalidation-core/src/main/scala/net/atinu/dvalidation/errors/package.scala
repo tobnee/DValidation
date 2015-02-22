@@ -52,8 +52,13 @@ package object errors {
       ) + args.hashCode
   }
 
-  class IsNotEqualError(valueExpected: Any, value: Any, path: PathString = Path./) extends AbstractDomainError(value, "error.dvalidation.notEqual", path, Seq(valueExpected.toString)) {
+  class IsNotEqualError(valueExpected: Any, value: Any, path: PathString = Path./)
+      extends AbstractDomainError(value, "error.dvalidation.notEqual", path) with DomainErrorWithExpectation {
     def copyWithPath(path: PathString) = new IsNotEqualError(valueExpected, value, path)
+
+    def expected = valueExpected
+
+    override def args = Seq(expected.toString)
   }
 
   class IsEmptyStringError(path: PathString = Path./) extends AbstractDomainError("", "error.dvalidation.emptyString", path) {
@@ -79,30 +84,48 @@ package object errors {
     def copyWithPath(path: PathString) = new IsTryFailureError(value, path)
   }
 
-  class IsNotGreaterThenError(valueMin: Any, value: Any, isInclusive: Boolean, path: PathString = Path./)
-      extends AbstractDomainError(value, "error.dvalidation.notGreaterThen", path, Seq(valueMin.toString, isInclusive.toString)) {
+  class IsNotGreaterThenError(valueMin: Any, value: Any, val isInclusive: Boolean, path: PathString = Path./)
+      extends AbstractDomainError(value, "error.dvalidation.notGreaterThen", path)
+      with DomainErrorWithExpectation {
 
     def copyWithPath(path: PathString) = new IsNotGreaterThenError(valueMin, value, isInclusive, path)
+
+    def expected = valueMin
+
+    override def args = Seq(expected.toString, isInclusive.toString)
   }
 
-  class IsNotLowerThenError(valueMax: Any, value: Any, isInclusive: Boolean, path: PathString = Path./)
-      extends AbstractDomainError(value, "error.dvalidation.notSmallerThen", path, Seq(valueMax.toString, isInclusive.toString)) {
+  class IsNotLowerThenError(valueMax: Any, value: Any, val isInclusive: Boolean, path: PathString = Path./)
+      extends AbstractDomainError(value, "error.dvalidation.notSmallerThen", path)
+      with DomainErrorWithExpectation {
 
     def copyWithPath(path: PathString) = new IsNotLowerThenError(valueMax, value, isInclusive, path)
+
+    def expected = valueMax
+
+    override def args = Seq(valueMax.toString, isInclusive.toString)
   }
 
-  sealed trait WrongSizeError extends DomainError
+  sealed trait WrongSizeError extends DomainErrorWithExpectation
 
   class IsToSmallError(valueMin: Any, value: Any, path: PathString = Path./)
-      extends AbstractDomainError(value, "error.dvalidation.tooSmallError", path, Seq(valueMin.toString)) with WrongSizeError {
+      extends AbstractDomainError(value, "error.dvalidation.tooSmallError", path) with WrongSizeError {
 
     def copyWithPath(path: PathString) = new IsToSmallError(valueMin, value, path)
+
+    def expected = valueMin
+
+    override def args = Seq(expected.toString)
   }
 
   class IsToBigError(valueMax: Any, value: Any, path: PathString = Path./)
-      extends AbstractDomainError(value, "error.dvalidation.tooBigError", path, Seq(valueMax.toString)) with WrongSizeError {
+      extends AbstractDomainError(value, "error.dvalidation.tooBigError", path) with WrongSizeError {
 
     def copyWithPath(path: PathString) = new IsToBigError(valueMax, value, path)
+
+    def expected = valueMax
+
+    override def args = Seq(expected.toString)
   }
 
   object CustomValidationError {

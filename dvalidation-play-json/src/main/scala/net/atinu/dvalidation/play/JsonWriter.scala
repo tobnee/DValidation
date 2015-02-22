@@ -14,7 +14,7 @@ object JsonWriter {
     field: FieldPrinter = JsonConf.NoFieldPrinter,
     msgKey: MsgKeyPrinter = JsonConf.DefaultMsgKey,
     value: ValuePrinter = JsonConf.ToStringValue,
-    args: ArgsPrinter = JsonConf.ArgsAsArray,
+    args: ArgsPrinter = JsonConf.NoArgs,
     msg: MsgPrinter = JsonConf.NoMsgPrinter) = new JsonWriter(path, field, msgKey, value, args, msg)
 
   val default: JsonWriter = apply()
