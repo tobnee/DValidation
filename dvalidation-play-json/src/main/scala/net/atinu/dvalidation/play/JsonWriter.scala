@@ -15,7 +15,9 @@ object JsonWriter {
     msgKey: MsgKeyPrinter = JsonConf.DefaultMsgKey,
     value: ValuePrinter = JsonConf.ToStringValue,
     args: ArgsPrinter = JsonConf.NoArgs,
-    msg: MsgPrinter = JsonConf.NoMsgPrinter) = new JsonWriter(path, field, msgKey, value, args, msg)
+    msg: MsgPrinter = JsonConf.NoMsgPrinter,
+    errorTransformer: ErrorTransformer = NoErrorTransformer) =
+    new JsonWriter(path, field, msgKey, value, args, msg, errorTransformer)
 
   val default: JsonWriter = apply()
 }
@@ -28,6 +30,7 @@ object JsonWriter {
  * @param value represent [[DomainError.value]]
  * @param args represent [[DomainError.args]]
  * @param msg represent a [[DomainError]] as string
+ * @param errorTransformer replaces / adds / removes information based on their type or content
  */
 class JsonWriter(
     path: PathPrinter,
@@ -35,7 +38,8 @@ class JsonWriter(
     msgKey: MsgKeyPrinter,
     value: ValuePrinter,
     args: ArgsPrinter,
-    msg: MsgPrinter) {
+    msg: MsgPrinter,
+    errorTransformer: ErrorTransformer) {
 
   /**
    * For each [[DomainError]] a corresponding entry in the [[JsArray]]
@@ -49,12 +53,13 @@ class JsonWriter(
    * Given the [[JsonConf]] class parameters represent a single [[DomainError]]
    */
   def renderSingle(error: DomainError): JsObject = {
-    path.apply(error) ++
+    val res = path.apply(error) ++
       field.apply(error) ++
       msgKey.apply(error) ++
       value.apply(error) ++
       msg.apply(error) ++
       args.apply(error)
+    errorTransformer.apply(res, error)
   }
 
   /**
