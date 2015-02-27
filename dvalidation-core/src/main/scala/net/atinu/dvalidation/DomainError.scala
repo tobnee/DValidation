@@ -1,13 +1,26 @@
 package net.atinu.dvalidation
 
+import net.atinu.dvalidation
 import net.atinu.dvalidation.Path.PathString
 
-import scalaz.{ Show, Equal, Semigroup }
+import scalaz.{ Equal, Show }
 
 object DomainError {
 
-  def unapply(v: DomainError): Some[(Any, String, PathString, Seq[String])] =
-    Some((v.value, v.msgKey, v.path, v.args))
+  def unapply(v: DomainError): Some[(Any, String, String, Seq[String])] =
+    Some((v.value, v.msgKey, dvalidation.Path.unwrap(v.path), v.args))
+
+  object Value {
+    def unapply(v: DomainError): Some[Any] = Some(v.value)
+  }
+
+  object MsgKey {
+    def unapply(v: DomainError): Some[Any] = Some(v.msgKey)
+  }
+
+  object Path {
+    def unapply(v: DomainError): Some[Any] = Some(dvalidation.Path.unwrap(v.path))
+  }
 
   implicit class ErrorToFailure(val error: DomainError) extends AnyVal {
     import scalaz.syntax.validation._

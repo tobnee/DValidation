@@ -107,6 +107,33 @@ class DomainErrorsSpec extends ValidationSuite {
     value should equal("value")
   }
 
+  test("has a value extractor") {
+    val a = new CustomValidationError("value", "key") match {
+      case DomainError.Value("value2") => false
+      case DomainError.Value("value") => true
+      case _ => false
+    }
+    a should equal(true)
+  }
+
+  test("has a key extractor") {
+    val a = new CustomValidationError("value", "key") match {
+      case DomainError.MsgKey("value2") => false
+      case DomainError.MsgKey("key") => true
+      case _ => false
+    }
+    a should equal(true)
+  }
+
+  test("has a path extractor") {
+    val a = new CustomValidationError("value", "key", path = Path.wrap("a.c.d")) match {
+      case DomainError.Path("a") => false
+      case DomainError.Path("a.c.d") => true
+      case _ => false
+    }
+    a should equal(true)
+  }
+
   test("Can sort without specifying order") {
     val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
     val e2 = new IsNoneError("/tests/[0]/c".asPath)
