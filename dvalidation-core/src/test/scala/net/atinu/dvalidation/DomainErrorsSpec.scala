@@ -126,9 +126,9 @@ class DomainErrorsSpec extends ValidationSuite {
   }
 
   test("has a path extractor") {
-    val a = new CustomValidationError("value", "key", path = Path.wrap("a.c.d")) match {
-      case DomainError.Path("a") => false
-      case DomainError.Path("a.c.d") => true
+    val a = new CustomValidationError("value", "key", path = Path.wrap("/a/c/d")) match {
+      case DomainError.Path("/a") => false
+      case DomainError.Path("/a/c/d") => true
       case _ => false
     }
     a should equal(true)
