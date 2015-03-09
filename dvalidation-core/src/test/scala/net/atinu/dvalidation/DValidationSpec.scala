@@ -3,6 +3,8 @@ package net.atinu.dvalidation
 import net.atinu.dvalidation.util.ValidationSuite
 
 import scala.util.Try
+import scalaz.Maybe.Empty
+import scalaz.{ Unapply, IsEmpty, Monoid }
 
 class DValidationSpec extends ValidationSuite {
 
@@ -347,4 +349,23 @@ class DValidationSpec extends ValidationSuite {
     validTry(t)(a => notBlank(a)) should beInvalidWithError(new IsTryFailureError(exception))
   }
 
+  test("not empty - default string") {
+    import scalaz.std.string._
+    nonEmptyGeneric("") should beInvalidWithError(new IsEmptyError(""))
+  }
+
+  test("not empty - default list") {
+    import scalaz.std.list._
+    nonEmptyGeneric(List.empty[Int]) should beInvalidWithError(new IsEmptyError(List.empty[Int]))
+  }
+
+  test("not empty - default map") {
+    import scalaz.std.map._
+    nonEmptyGeneric(Map.empty[String, Int]) should beInvalidWithError(new IsEmptyError(Map.empty[String, Int]))
+  }
+
+  test("not empty - default option") {
+    import scalaz.std.option._
+    nonEmptyGeneric(None.asInstanceOf[Option[String]]) should beInvalidWithError(new IsEmptyError(None))
+  }
 }
