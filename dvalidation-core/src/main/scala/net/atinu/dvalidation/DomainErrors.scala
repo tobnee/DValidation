@@ -31,6 +31,10 @@ object DomainErrors {
       def equal(a1: DomainErrors, a2: DomainErrors): Boolean = a1 == a2
     }
 
+  implicit class LiftDomainError(val error: DomainError) extends AnyVal {
+    def toErrors = DomainErrors.withSingleError(error)
+  }
+
   val MsgKeyOrder: Order[DomainError] = scalaz.Order.orderBy[DomainError, String](_.msgKey)
 
   val PathOrdering: Order[DomainError] = scalaz.Order.orderBy[DomainError, String](_.path.unwrap)

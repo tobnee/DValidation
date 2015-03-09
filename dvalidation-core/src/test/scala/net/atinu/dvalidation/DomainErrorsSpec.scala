@@ -158,4 +158,10 @@ class DomainErrorsSpec extends ValidationSuite {
     val e = DomainErrors.withErrors(e4, e2, e1, e3)
     e.sorted.asList should contain inOrder (e1, e2, e3, e4)
   }
+
+  test("A DomainError can be lifted to a DomainErrors") {
+    import DomainErrors._
+    val error = new IsEmptyStringError("/tests/[0]/b".asPath)
+    DomainErrors.withSingleError(error) should equal(error.toErrors)
+  }
 }
