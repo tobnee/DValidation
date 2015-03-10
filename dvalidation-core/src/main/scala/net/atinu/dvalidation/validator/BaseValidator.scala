@@ -69,6 +69,19 @@ trait BaseValidator extends ValidatorBase {
     }
 
   /**
+   * Check that a value is not equal to excluded values
+   * @see [[IsEqualToError]]
+   */
+  def notEqualTo[T](given: T, excluded: T*): DValidation[T] = {
+    import scalaz.syntax.validation._
+
+    excluded.find(_ == given) match {
+      case Some(m) => DomainErrors.withSingleError(new IsEqualToError(m)).failure
+      case _ => valid(given)
+    }
+  }
+
+  /**
    * Uses the == operator on AnyRef for checking equality
    * @see [[IsNotEqualError]]
    */

@@ -61,6 +61,11 @@ package object errors {
     override def args = Seq(expected.toString)
   }
 
+  class IsEqualToError(value: Any, path: PathString = Path./)
+      extends AbstractDomainError(value, "error.dvalidation.isEqual", path) {
+    def copyWithPath(path: PathString) = new IsEqualToError(value, path)
+  }
+
   class IsEmptyError(v: Any, path: PathString = Path./) extends AbstractDomainError(v, "error.dvalidation.isEmpty", path) {
     def copyWithPath(path: PathString) = new IsEmptyError(v, path)
   }

@@ -368,4 +368,16 @@ class DValidationSpec extends ValidationSuite {
     import scalaz.std.option._
     nonEmptyGeneric(None.asInstanceOf[Option[String]]) should beInvalidWithError(new IsEmptyError(None))
   }
+
+  test("values can be excluded") {
+    val a = notEqualTo(50, excluded = 2, 1, 5)
+    println(a)
+    a should beValid
+  }
+
+  test("values can be excluded - failure") {
+    val a = notEqualTo(5, excluded = 2, 1, 5)
+    println(a)
+    a should beInvalidWithError(new IsEqualToError(5))
+  }
 }

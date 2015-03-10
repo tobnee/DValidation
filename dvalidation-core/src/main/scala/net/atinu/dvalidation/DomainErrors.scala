@@ -9,6 +9,8 @@ object DomainErrors {
 
   def apply[A <: DomainError](h: A, t: A*) = new DomainErrors(NonEmptyList(h, t: _*))
 
+  def apply2[A <: DomainError](h: A, t: Seq[A]) = new DomainErrors(NonEmptyList(h, t: _*))
+
   def withSingleError(error: DomainError) = new DomainErrors(NonEmptyList.apply(error))
 
   def withErrors(errors: DomainError*) =
