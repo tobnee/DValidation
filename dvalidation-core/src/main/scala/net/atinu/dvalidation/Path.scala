@@ -33,9 +33,13 @@ object Path {
 
     def segments: Vector[Path.PathPart] = {
       if (path == Path./) Vector.empty
-      else Path.unwrap(path)
-        .tail.split('/')
-        .map(PathPart.extract).toVector
+      else elements
+        .map(PathPart.extract)
+    }
+
+    def elements: Vector[String] = {
+      Path.unwrap(path)
+        .tail.split('/').toVector
     }
 
     private def nestIntern(seg: String): PathString = {
