@@ -5,6 +5,8 @@ import net.atinu.dvalidation.errors.{ IsNotLowerThenError, IsNotGreaterThenError
 
 import scalaz.{ Failure, Order, Semigroup }
 
+object OrderValidator extends OrderValidator
+
 trait OrderValidator extends ValidatorBase {
 
   /**

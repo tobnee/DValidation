@@ -8,6 +8,8 @@ import scala.annotation.implicitNotFound
 import scala.collection.GenTraversableOnce
 import scalaz.Foldable
 
+object SizedValidator extends SizedValidator
+
 trait SizedValidator extends ValidatorBase {
 
   /**
