@@ -1,4 +1,4 @@
-package net.atinu.dvalidation.validator
+package net.atinu.dvalidation.validators
 
 import net.atinu.dvalidation.Validator._
 import net.atinu.dvalidation._

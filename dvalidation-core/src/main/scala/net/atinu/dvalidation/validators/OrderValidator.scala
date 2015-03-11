@@ -1,4 +1,4 @@
-package net.atinu.dvalidation.validator
+package net.atinu.dvalidation.validators
 
 import net.atinu.dvalidation._
 import net.atinu.dvalidation.errors.{ IsNotLowerThenError, IsNotGreaterThenError }

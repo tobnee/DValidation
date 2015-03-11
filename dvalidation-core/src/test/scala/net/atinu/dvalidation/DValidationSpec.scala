@@ -1,7 +1,7 @@
 package net.atinu.dvalidation
 
 import net.atinu.dvalidation.util.ValidationSuite
-import net.atinu.dvalidation.validator.GenericValidator
+import net.atinu.dvalidation.validators.GenericValidator
 
 import scala.util.Try
 import scalaz.Maybe.Empty

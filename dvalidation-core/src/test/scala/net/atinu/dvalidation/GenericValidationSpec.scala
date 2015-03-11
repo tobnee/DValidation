@@ -2,7 +2,7 @@ package net.atinu.dvalidation
 
 import net.atinu.dvalidation.errors.{ IsZeroError, IsEmptyError }
 import net.atinu.dvalidation.util.ValidationSuite
-import net.atinu.dvalidation.validator.GenericValidator._
+import net.atinu.dvalidation.validators.GenericValidator._
 
 class GenericValidationSpec extends ValidationSuite {
 
