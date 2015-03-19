@@ -10,7 +10,7 @@ class PathSpec extends ValidationSuite {
   case class VTest(a: Int, b: String, c: Option[String])
 
   def isEqual[T](valueCheck: T, valueExcept: T) =
-    ensure(valueCheck)("error.dvalidation.isequal", valueExcept)(a => a == valueExcept)
+    ensure(valueCheck)("error.dvalidation.isequal", "expected" -> valueExcept)(a => a == valueExcept)
 
   test("validate paths") {
     Path.isValidPath("") should be(false)
@@ -23,7 +23,7 @@ class PathSpec extends ValidationSuite {
   test("build paths") {
     val vtest = VTest(1, "", None)
     vtest.validateWith(isEqual(vtest.a, 2) forAttribute 'a forAttribute 'b) should beInvalidWithError(
-      CustomValidationError(1, "error.dvalidation.isequal", args = "2")
+      CustomValidationError(1, "error.dvalidation.isequal", params = "expected" -> 2)
         .nestAttribute('a).nestAttribute('b))
   }
 

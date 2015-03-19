@@ -11,11 +11,12 @@ object LawTest extends Properties("DomainErrors") {
   def deGen: Gen[DomainError] = for {
     value <- Gen.alphaStr
     key <- Gen.alphaStr
-    args <- Gen.listOf(Gen.alphaStr)
     errors <- Gen.oneOf(
-      new CustomValidationError(value, key, args),
+      new CustomValidationError(value, key),
       new IsEmptyStringError(),
-      new IsEmptySeqError())
+      new IsEmptySeqError(),
+      new DefaultKeyDelegator(new IsEmptyStringError(), key)
+    )
   } yield errors
 
   def desGen: Gen[DomainErrors] = for {

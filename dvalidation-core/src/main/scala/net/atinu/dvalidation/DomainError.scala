@@ -52,8 +52,15 @@ trait DomainError {
   /** a path to map an error to its location in a nested object */
   def path: PathString
 
-  /** arguments of the error (e.g. expected values) */
+  /** arguments of the error (e.g. expected values). Usually meant as a view on [[parameters]] */
   def args: Seq[String]
+
+  /**
+   * parameters of the error which are not covered by the core domain error attributes
+   * implementers should offer this to make attributes from the specific domain
+   * error visible with this generic domain error method
+   */
+  def parameters: Map[String, Any]
 
   /**
    * create a new domain error with a new path, replacing old path information

@@ -18,12 +18,12 @@ object Validator extends BaseValidator with OrderValidator with SizedValidator {
    *
    * @param s a value to be validated
    * @param key a string representation of this error
-   * @param args parameters for the key
+   * @param params parameters for the key
    * @param v predicate which indicates if the value is valid
    * @see [[CustomValidationError]]
    */
-  def ensure[T](s: T)(key: String, args: Any*)(v: T => Boolean)(implicit mapError: ErrorMap[CustomValidationError]): DValidation[T] =
-    if (v(s)) s.success else failMapped(new CustomValidationError(s, key, args.map(_.toString)))
+  def ensure[T](s: T)(key: String, params: (String, Any)*)(v: T => Boolean)(implicit mapError: ErrorMap[CustomValidationError]): DValidation[T] =
+    if (v(s)) s.success else failMapped(new CustomValidationError(s, key, params.toMap))
 
   /**
    * Validate all elements of a given sequence
@@ -73,9 +73,9 @@ object Validator extends BaseValidator with OrderValidator with SizedValidator {
   /**
    * Create a validation error for a given value
    * @param key see [[DomainError.msgKey]]
-   * @param args see [[DomainError.args]]
+   * @param params see [[DomainError.parameters]]
    */
-  def invalid[T](value: Any, key: String, args: String*) = new CustomValidationError(value, key, args.toSeq).invalid[T]
+  def invalid[T](value: Any, key: String, params: (String, Any)*) = new CustomValidationError(value, key, params.toMap).invalid[T]
 
   /**
    * Lift a value to a valid validation

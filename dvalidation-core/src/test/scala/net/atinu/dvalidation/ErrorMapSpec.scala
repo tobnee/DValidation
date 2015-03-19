@@ -26,38 +26,38 @@ class ErrorMapSpec extends ValidationSuite {
 
   test("Error can be mapped") {
     implicit val mapEmptyString = new ErrorMap[IsEmptyStringError] {
-      def apply(v1: IsEmptyStringError) = new CustomValidationError(v1.value, "a.b.c", v1.args, v1.path)
+      def apply(v1: IsEmptyStringError) = new CustomValidationError(v1.value, "a.b.c", v1.parameters, v1.path)
     }
 
     notBlank("")(mapEmptyString) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
   }
 
   test("Error can be mapped with lifted function") {
-    notBlank("")(v1 => new CustomValidationError(v1.value, "a.b.c", v1.args, v1.path)) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
+    notBlank("")(v1 => new CustomValidationError(v1.value, "a.b.c", v1.parameters, v1.path)) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
   }
 
   test("Error can be mapped with a factory") {
     implicit val mapEmptyString = ErrorMap.apply[IsEmptyStringError](e =>
-      new CustomValidationError(e.value, "a.b.c", e.args, e.path))
+      new CustomValidationError(e.value, "a.b.c", e.parameters, e.path))
 
     notBlank("") should beInvalidWithError(new CustomValidationError("", "a.b.c"))
   }
 
   test("Error can be mapped with a factory - 2") {
     notBlank("")(ErrorMap.apply(e =>
-      new CustomValidationError(e.value, "a.b.c", e.args, e.path))) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
+      new CustomValidationError(e.value, "a.b.c", e.parameters, e.path))) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
   }
 
   test("Error can be mapped with a dispatcher") {
     implicit val mapEmptyString = ErrorMap.dispatch {
-      case e: IsEmptyStringError => new CustomValidationError(e.value, "a.b.c", e.args, e.path)
+      case e: IsEmptyStringError => new CustomValidationError(e.value, "a.b.c", e.parameters, e.path)
     }
     notBlank("") should beInvalidWithError(new CustomValidationError("", "a.b.c"))
   }
 
   test("Error can be mapped with a dispatcher fallback") {
     implicit val mapEmptyString = ErrorMap.dispatch {
-      case e: CustomValidationError => new CustomValidationError(e.value, "a.b.c", e.args, e.path)
+      case e: CustomValidationError => new CustomValidationError(e.value, "a.b.c", e.parameters, e.path)
     }
     notBlank("") should beInvalidWithError(new IsEmptyStringError())
   }

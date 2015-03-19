@@ -30,11 +30,11 @@ class DValidationSpec extends ValidationSuite {
   }
 
   test("validate any value") {
-    ensure(1)("error.dvalidation.isequal", 1)(_ == 1) should beValidResult(1)
+    ensure(1)("error.dvalidation.isequal", "expected" -> 1)(_ == 1) should beValidResult(1)
   }
 
   test("validate any value 2") {
-    ensure(1)("error.dvalidation.isequal", 2)(_ == 2) should beInvalidWithError(new CustomValidationError(1, "error.dvalidation.isequal", Seq("2")))
+    ensure(1)("error.dvalidation.isequal", "expected" -> 2)(_ == 2) should beInvalidWithError(new CustomValidationError(1, "error.dvalidation.isequal", Map("expected" -> 2)))
   }
 
   test("List is empty") {
@@ -210,7 +210,7 @@ class DValidationSpec extends ValidationSuite {
   test("validate case class") {
     val vtest = VTest(1, "sdf", Some("a"))
     val res: DValidation[VTest] = vtest.validateWith(
-      ensure(vtest.a)("should be 1", 1)(_ == 1),
+      ensure(vtest.a)("should be 1", "expected" -> 1)(_ == 1),
       notBlank(vtest.b)
     )
     res should beValidResult(vtest)
@@ -219,11 +219,11 @@ class DValidationSpec extends ValidationSuite {
   test("validate case class 2") {
     val vtest = VTest(1, "", Some("a"))
     val res = vtest.validateWith(
-      ensure(vtest.a)("validation.equal", 2)(_ == 2),
+      ensure(vtest.a)("validation.equal", "expected" -> 2)(_ == 2),
       notBlank(vtest.b)
     )
     res should beInvalidWithErrors(
-      new CustomValidationError(1, "validation.equal", Seq("2")),
+      new CustomValidationError(1, "validation.equal", Map("expected" -> 2)),
       new IsEmptyStringError()
     )
   }

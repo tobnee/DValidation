@@ -7,7 +7,8 @@ package object errors {
   /**
    * A base class which can be used to define a custom [[DomainError]]
    */
-  abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathString, argsP: Seq[String] = Nil) extends DomainError {
+  abstract class AbstractDomainError(valueP: Any, msgKeyP: String, pathP: PathString, params: Map[String, Any] = Map.empty)
+      extends DomainError with DomainErrorBase with NestingDomainError {
 
     def value = valueP
 
@@ -15,7 +16,13 @@ package object errors {
 
     def path = pathP
 
-    def args = argsP
+    def parameters = params
+
+    def args = params.values.map(_.toString).toVector
+
+  }
+
+  trait NestingDomainError { this: DomainError =>
 
     def nest(path: PathString): DomainError = {
       copyWithPath(this.path.nest(path))
@@ -28,17 +35,20 @@ package object errors {
     def nestAttribute(segment: Symbol): DomainError = {
       copyWithPath(path.nestSymbol(segment))
     }
+  }
+
+  trait DomainErrorBase { this: DomainError =>
 
     private def argsString = if (args.isEmpty) "" else s", args: ${args.mkString(",")}"
 
     override def toString = s"""DomainError(path: $path, value: $value, msgKey: $msgKey$argsString)"""
 
     override def equals(value: Any) = value match {
-      case v: AbstractDomainError if v.getClass == this.getClass =>
+      case v: DomainError =>
         v.value == this.value &&
           v.msgKey == this.msgKey &&
           v.path == this.path &&
-          v.args == this.args
+          v.parameters == this.parameters
       case _ => false
     }
 
@@ -49,7 +59,30 @@ package object errors {
             41 + value.hashCode
           ) + msgKey.hashCode
         ) + Path.unwrap(path).hashCode
-      ) + args.hashCode
+      ) + parameters.hashCode
+  }
+
+  abstract class ErrorDelegation(private val error: DomainError, val msgKey: String)
+      extends DomainError with NestingDomainError with DomainErrorBase {
+
+    protected def delegate(de: DomainError): DomainError
+
+    def value: Any = error.value
+
+    def copyWithPath(path: PathString): DomainError =
+      delegate(error.copyWithPath(path))
+
+    def args: Seq[String] = error.args
+
+    def path: PathString = error.path
+
+    def parameters: Map[String, Any] = error.parameters
+  }
+
+  class DefaultKeyDelegator(error: DomainError, msgKey: String) extends ErrorDelegation(error, msgKey) {
+
+    protected def delegate(de: DomainError): DomainError =
+      new DefaultKeyDelegator(de, msgKey)
   }
 
   class IsNotEqualError(valueExpected: Any, value: Any, path: PathString = Path./)
@@ -58,7 +91,8 @@ package object errors {
 
     def expected = valueExpected
 
-    override def args = Seq(expected.toString)
+    override def parameters = Map("expected" -> expected)
+
   }
 
   class IsEqualToError(value: Any, path: PathString = Path./)
@@ -101,7 +135,7 @@ package object errors {
 
     def expected = valueMin
 
-    override def args = Seq(expected.toString, isInclusive.toString)
+    override def parameters = Map("expected" -> expected, "isInclusive" -> isInclusive)
   }
 
   class IsNotLowerThenError(valueMax: Any, value: Any, val isInclusive: Boolean, path: PathString = Path./)
@@ -112,7 +146,7 @@ package object errors {
 
     def expected = valueMax
 
-    override def args = Seq(valueMax.toString, isInclusive.toString)
+    override def parameters = Map("max" -> valueMax, "isInclusive" -> isInclusive)
   }
 
   sealed trait WrongSizeError extends DomainErrorWithExpectation
@@ -124,7 +158,7 @@ package object errors {
 
     def expected = valueMin
 
-    override def args = Seq(expected.toString)
+    override def parameters = Map("expected" -> expected)
   }
 
   class IsToBigError(valueMax: Any, value: Any, path: PathString = Path./)
@@ -134,18 +168,18 @@ package object errors {
 
     def expected = valueMax
 
-    override def args = Seq(expected.toString)
+    override def parameters = Map("expected" -> expected)
   }
 
   object CustomValidationError {
-    def apply(value: Any, key: String, args: String*) = new CustomValidationError(value, key, args.toSeq)
+    def apply(value: Any, key: String, params: (String, Any)*) = new CustomValidationError(value, key, params.toMap)
 
-    def withKey(e: DomainError, msgKey: String) = new CustomValidationError(e.value, msgKey, e.args, e.path)
+    def withKey(e: DomainError, msgKey: String) = new CustomValidationError(e.value, msgKey, path = e.path, params = e.parameters)
   }
 
-  class CustomValidationError(value: Any, key: String, args: Seq[String] = Nil, path: PathString = Path./) extends AbstractDomainError(value, key, path, args) {
+  class CustomValidationError(value: Any, key: String, params: Map[String, Any] = Map.empty, path: PathString = Path./) extends AbstractDomainError(value, key, path, params) {
 
-    def copyWithPath(path: PathString) = new CustomValidationError(value, key, args, path)
+    def copyWithPath(path: PathString) = new CustomValidationError(value, key, params, path)
   }
 
 }
