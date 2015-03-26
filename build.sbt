@@ -13,6 +13,12 @@ lazy val playJson = dvalProject("play-json")
   )
   .dependsOn(core)
 
+lazy val jdk8time = dvalProject("validators-jdk8time")
+  .settings(
+    libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion % "provided"
+  )
+  .dependsOn(core % "compile->compile;test->test")
+
 scoverage.ScoverageSbtPlugin.instrumentSettings
 
 org.scoverage.coveralls.CoverallsPlugin.coverallsSettings
