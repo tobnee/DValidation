@@ -1,6 +1,6 @@
 package net.atinu.dvalidation.play
 
-import net.atinu.dvalidation.{ DValidation, DomainError, DomainErrors }
+import net.atinu.dvalidation.{ Path, DValidation, DomainError, DomainErrors }
 import net.atinu.dvalidation.play.JsonConf._
 
 import play.api.libs.json._
@@ -19,7 +19,78 @@ object JsonWriter {
     errorTransformer: ErrorTransformer = NoErrorTransformer) =
     new JsonWriter(path, field, msgKey, value, args, msg, errorTransformer)
 
+  def applyH(
+    field: FieldPrinter = JsonConf.NoFieldPrinter,
+    msgKey: MsgKeyPrinter = JsonConf.DefaultMsgKey,
+    value: ValuePrinter = JsonConf.ToStringValue,
+    args: ArgsPrinter = JsonConf.NoArgs,
+    msg: MsgPrinter = JsonConf.NoMsgPrinter,
+    errorTransformer: ErrorTransformer = NoErrorTransformer) =
+    new HJsonWriter(field, msgKey, value, args, msg, errorTransformer)
+
   val default: JsonWriter = apply()
+
+  val hierarchical: HJsonWriter = applyH()
+}
+
+class HJsonWriter(field: FieldPrinter,
+    msgKey: MsgKeyPrinter,
+    value: ValuePrinter,
+    args: ArgsPrinter,
+    msg: MsgPrinter,
+    errorTransformer: ErrorTransformer) {
+
+  /**
+   * All domain errors get mapped to a path hierarchy
+   */
+  def renderAll(errors: DomainErrors): JsObject = {
+    import Path._
+    errors.sorted.asList.map { err =>
+      val pathArray = err.path.segments.map(_.value)
+      pathArray.reverse match {
+        case field +: tail =>
+          val leafObject = Json.obj(field -> renderSingle(err))
+          tail.foldLeft(leafObject)((sub, parentField) =>
+            Json.obj(parentField -> sub.as[JsObject])
+          )
+        case _ => renderSingle(err)
+      }
+    }.reduce((a, b) => a.as[JsObject] deepMerge b.as[JsObject])
+  }
+
+  /**
+   * Given the [[JsonConf]] class parameters represent a single [[DomainError]]
+   */
+  def renderSingle(error: DomainError): JsObject = {
+    val res =
+      field.apply(error) ++
+        msgKey.apply(error) ++
+        value.apply(error) ++
+        msg.apply(error) ++
+        args.apply(error)
+    errorTransformer.apply(res, error)
+  }
+
+  /**
+   * Given a [[scalaz.Failure]] return [[renderAll()]] within a JSON object or a JSON representation of the value object
+   * @param errorRootName name of the root note containing the error values
+   * @tparam T domain validation value type
+   */
+  def renderValidation[T: Writes](validation: DValidation[T], errorRootName: String = "errors"): JsValue = {
+    validation match {
+      case Failure(a) => Json.obj(errorRootName -> renderAll(a))
+      case Success(b) => Json.toJson(b)
+    }
+  }
+
+  /**
+   * Transforms a [[DValidation]] into a validation with a JSON error and value type
+   * @tparam T type of the [[DValidation]] value
+   */
+  def toJsonValidation[T: Writes](validation: DValidation[T]): Validation[JsObject, JsValue] = {
+    validation.bimap(renderAll, value => Json.toJson(value))
+  }
+
 }
 
 /**

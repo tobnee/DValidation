@@ -102,4 +102,14 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     error2 should containKeyValue("value" -> JsObject(Nil))
   }
 
+  test("Depth of path is considered in order") {
+    import Path._
+    val e1 = new IsEmptyStringError("/a".asPath)
+    val e2 = new IsNoneError("/tests/[0]".asPath)
+    val e3 = new IsNoneError("/tests/[0]/df".asPath)
+    val e4 = new IsNoneError("/a/b/c/d".asPath)
+    val e = DomainErrors.withErrors(e4, e2, e1, e3)
+    println(Json.prettyPrint(JsonWriter.applyH().renderAll(e)))
+  }
+
 }

@@ -8,7 +8,7 @@ import scala.reflect.ClassTag
 object ErrorTransformer {
 
   /**
-   * A transformation for a given type T. 
+   * A transformation for a given type T.
    * @param transFunc given the current state and the domain error yield a domain error
    */
   def transformFor[T <: DomainError](transFunc: (JsObject, T) => JsObject)(implicit ct: ClassTag[T]): ErrorTransformer =
@@ -54,7 +54,7 @@ trait ErrorTransformer {
   def apply(currentState: JsObject, error: DomainError): JsObject
 
   /**
-   * Does the transformation yield a new result 
+   * Does the transformation yield a new result
    */
   def canTransform(currentState: JsObject, error: DomainError): Boolean
 }
