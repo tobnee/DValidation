@@ -26,6 +26,13 @@ package object dvalidation {
     def validateWith(validations: DValidation[_]*): DValidation[T] = {
       applyValidations(validations, value)
     }
+
+    def validateCategory[T](scope: T)(sv: ScopedValidations[T]*)(implicit sd: Scope[T]): DValidation[_] = {
+      val validationsInScope = sv
+        .filter(sv => sv.matchesStrict(scope))
+        .flatMap(_.validations.apply())
+      validateWith(validationsInScope: _*)
+    }
   }
 
   implicit class tryToValidation[T](val value: Try[T]) extends AnyVal {
@@ -79,6 +86,10 @@ package object dvalidation {
      */
     def forAttribute(attr: Symbol): DValidation[T] = {
       nestPathOnError(value, _.nestAttribute(attr))
+    }
+
+    def forCategory(category: Symbol*): DValidation[T] = {
+      value
     }
 
     /**
