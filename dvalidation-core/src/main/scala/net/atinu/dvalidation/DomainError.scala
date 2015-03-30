@@ -15,11 +15,11 @@ object DomainError {
   }
 
   object MsgKey {
-    def unapply(v: DomainError): Some[Any] = Some(v.msgKey)
+    def unapply(v: DomainError): Some[String] = Some(v.msgKey)
   }
 
   object Path {
-    def unapply(v: DomainError): Some[Any] = Some(dvalidation.Path.unwrap(v.path))
+    def unapply(v: DomainError): Some[String] = Some(dvalidation.Path.unwrap(v.path))
   }
 
   implicit class ErrorToFailure(val error: DomainError) extends AnyVal {
