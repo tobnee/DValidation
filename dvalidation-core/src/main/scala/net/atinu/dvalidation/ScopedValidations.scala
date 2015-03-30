@@ -1,48 +1,63 @@
 package net.atinu.dvalidation
 
+import net.atinu.dvalidation.Path.PathString
+
 import scala.reflect.ClassTag
 
-case class ScopedValidations[T](sx: List[T], s: Scope[T], validations: () => List[DValidation[_]]) {
-  def matchesStrict(x: T): Boolean = sx.exists(v => s.matchesStrict(v, x))
+case class ScopedValidations[T](scopes: List[T], scopeDef: Scope[T], validations: () => List[DValidation[_]]) {
 
-  def matches(x: Any): Boolean = sx.exists(v => s.matches(v, x))
+  def matches(expected: T): Boolean = scopes.exists(scope => scopeDef.matches(expected, scope))
+
+  def validationsFor(expected: T): List[DValidation[_]] =
+    if (matches(expected)) validations.apply()
+    else Nil
+
 }
 
 trait Scope[T] {
 
-  def matchesStrict(x: T, y: T): Boolean
+  def matches(x: T, y: T): Boolean
 
-  def matches(x: Any, y: Any): Boolean
 }
 
 object ScopedValidations {
 
-  implicit def symbolScope = new Scope[Symbol] {
-    def matchesStrict(v1: Symbol, v2: Symbol) = v1 == v2
-
-    def matches(x: Any, y: Any): Boolean = (x, y) match {
-      case (a: Symbol, b: Symbol) => matchesStrict(a, b)
-      case _ => false
+  trait SymbolScope {
+    implicit def symbolScope = new Scope[Symbol] {
+      def matches(v1: Symbol, v2: Symbol) = v1 == v2
     }
   }
 
-  implicit def equalScope[T](implicit equ: scalaz.Equal[T], manifest: ClassTag[T]) = new Scope[T] {
-    val clazz = manifest.runtimeClass
+  object SymbolScope extends SymbolScope
 
-    override def matchesStrict(x: T, y: T): Boolean = equ.equal(x, y)
-
-    override def matches(x: Any, y: Any): Boolean = {
-      if (clazz.isInstance(x) && clazz.isInstance(y))
-        matchesStrict(x.asInstanceOf[T], y.asInstanceOf[T])
-      else false
+  trait EqualityScope {
+    implicit def equalScope[T](implicit equ: scalaz.Equal[T]) = new Scope[T] {
+      def matches(x: T, y: T): Boolean = equ.equal(x, y)
     }
   }
+
+  object EqualityScope extends EqualityScope
+
+  trait PathScope {
+    implicit def pathScope = new Scope[PathString] {
+      import Path._
+
+      def matches(parentScope: PathString, subScope: PathString): Boolean = {
+        val ep = parentScope.elements
+        val ec = subScope.elements
+        if (ep.size <= ec.size) ec.take(ep.size) == ep
+        else false
+      }
+    }
+  }
+
+  object PathScope extends PathScope
 
   def inScope(scope: Symbol*)(v: => DValidation[_]) =
-    ScopedValidations(scope.toList, symbolScope, () => List(v))
+    ScopedValidations(scope.toList, SymbolScope.symbolScope, () => List(v))
 
   def allInScope(scope: Symbol*)(v: => List[DValidation[_]]) =
-    ScopedValidations(scope.toList, symbolScope, () => v)
+    ScopedValidations(scope.toList, SymbolScope.symbolScope, () => v)
 
   def inCustomScope[T](scope: T*)(v: => DValidation[_])(implicit sd: Scope[T]) =
     ScopedValidations(scope.toList, sd, () => List(v))

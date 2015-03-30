@@ -28,10 +28,9 @@ package object dvalidation {
     }
 
     def validateCategory[T](scope: T)(sv: ScopedValidations[T]*)(implicit sd: Scope[T]): DValidation[_] = {
-      val validationsInScope = sv
-        .filter(sv => sv.matchesStrict(scope))
-        .flatMap(_.validations.apply())
-      validateWith(validationsInScope: _*)
+      var builder = List.newBuilder[DValidation[_]]
+      for (s <- sv) { builder ++= s.validationsFor(scope) }
+      validateWith(builder.result(): _*)
     }
   }
 

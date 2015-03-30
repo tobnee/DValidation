@@ -12,6 +12,7 @@ class ClassifierSpec extends ValidationSuite {
 
   test("a classifer can apply validations in scope") {
     val value = new CTest("", "", "")
+    import ScopedValidations.SymbolScope._
     value.validateCategory('foo)(
       inScope('foo)(notBlank(value.a) forAttribute 'a),
       inScope('foo2)(notBlank(value.b) forAttribute 'b),
@@ -21,6 +22,7 @@ class ClassifierSpec extends ValidationSuite {
 
   test("a classifer can apply validations in scope 2") {
     val value = new CTest("", "", "")
+    import ScopedValidations.SymbolScope._
     value.validateCategory('foo2)(
       inScope('foo)(notBlank(value.a) forAttribute 'a),
       inScope('foo2)(notBlank(value.b) forAttribute 'b),
@@ -33,6 +35,7 @@ class ClassifierSpec extends ValidationSuite {
 
   test("a classifer can apply multible validations in one scope") {
     val value = new CTest("", "", "")
+    import ScopedValidations.SymbolScope._
     value.validateCategory('foo2)(
       inScope('foo)(notBlank(value.a) forAttribute 'a),
       allInScope('foo2)(List(
@@ -46,6 +49,7 @@ class ClassifierSpec extends ValidationSuite {
 
   test("a scoped validation can have multible scopes") {
     val value = new CTest("", "", "")
+    import ScopedValidations.SymbolScope._
     value.validateCategory('too)(
       inScope('foo, 'too)(notBlank(value.a) forAttribute 'a),
       inScope('foo2)(notBlank(value.b) forAttribute 'b),
@@ -55,8 +59,9 @@ class ClassifierSpec extends ValidationSuite {
       )
   }
 
-  test("a custome scope can be inferred from a scalaz.Equals instance") {
+  test("a custom scope can be inferred from a scalaz.Equals instance") {
     val value = new CTest("", "", "")
+    import ScopedValidations.EqualityScope._
     import scalaz.std.string._
     value.validateCategory("foo2")(
       inCustomScope("foo")(notBlank(value.a) forAttribute 'a),
@@ -66,6 +71,29 @@ class ClassifierSpec extends ValidationSuite {
         new IsEmptyStringError(Path.wrap("/b")),
         new IsEmptyStringError(Path.wrap("/c"))
       )
+  }
+
+  test("a classifer can apply validations in a hierarchical scope") {
+    val value = new CTest("", "", "")
+    import Path._
+    import ScopedValidations.PathScope._
+    value.validateCategory("/foo".asPath)(
+      inCustomScope("/foo/a".asPath)(notBlank(value.a) forAttribute 'a),
+      inCustomScope("/foo/b".asPath)(notBlank(value.b) forAttribute 'b),
+      inCustomScope("/bar/c".asPath)(notBlank(value.c) forAttribute 'c)
+    ) should beInvalidWithErrors(
+        new IsEmptyStringError(Path.wrap("/a")),
+        new IsEmptyStringError(Path.wrap("/b"))
+      )
+  }
+
+  test("a hierarchical scope") {
+    import ScopedValidations.PathScope._
+    import Path._
+    val hs = implicitly[Scope[PathString]]
+    hs.matches("/foo".asPath, "/foo/bar".asPath) should equal(true)
+    hs.matches("/foo/bar".asPath, "/foo".asPath) should equal(false)
+    hs.matches("/foo".asPath, "/bar/c".asPath) should equal(false)
   }
 
 }
