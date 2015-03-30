@@ -49,9 +49,8 @@ object DomainErrors {
     }
 
   private def comparePathDepth(a: DomainError, b: DomainError) = {
-    val slash = '/'
-    val sizeA = a.path.unwrap.count(_ == slash)
-    val sizeB = b.path.unwrap.count(_ == slash)
+    val sizeA = a.path.depth
+    val sizeB = b.path.depth
     if (sizeA == sizeB) Ordering.EQ
     else if (sizeA < sizeB) Ordering.LT
     else Ordering.GT

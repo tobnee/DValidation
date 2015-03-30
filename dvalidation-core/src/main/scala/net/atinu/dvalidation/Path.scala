@@ -42,6 +42,8 @@ object Path {
         .tail.split('/').toVector
     }
 
+    def depth = unwrap.count(_ == '/')
+
     private def nestIntern(seg: String): PathString = {
       val newPath = Path.unwrap(path) match {
         case "/" => s"/$seg"
