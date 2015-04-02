@@ -9,6 +9,9 @@ case class ScopedValidations[T](scopes: List[T], scopeDef: Scope[T], validations
   def validationsForOneOf(expectedScopes: Seq[T]): List[DValidation[_]] =
     applyCond(expectedScopes.exists(matches))
 
+  def validationsForAllOf(expectedScopes: Seq[T]): List[DValidation[_]] =
+    applyCond(expectedScopes.forall(matches))
+
   def validationsForScope(expectedScope: T): List[DValidation[_]] =
     applyCond(matches(expectedScope))
 

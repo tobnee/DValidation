@@ -59,16 +59,28 @@ class ScopeSpec extends ValidationSuite {
       )
   }
 
-  test("a scoped validation can have validate for multile scopes") {
+  test("a scoped validation can have validate for any of multile scopes") {
     val value = new CTest("", "", "")
     import SymbolScope._
-    value.validateScoped('foo, 'foo2)(
+    value.validateAnyScope('foo, 'foo2)(
       inScope('foo)(notBlank(value.a) forAttribute 'a),
       inScope('foo1)(notBlank(value.b) forAttribute 'b),
       inScope('foo2)(notBlank(value.c) forAttribute 'c)
     ) should beInvalidWithErrors(
         new IsEmptyStringError(Path.wrap("/a")),
         new IsEmptyStringError(Path.wrap("/c"))
+      )
+  }
+
+  test("a scoped validation can have validate for all of multile scopes") {
+    val value = new CTest("", "", "")
+    import SymbolScope._
+    value.validateAllScopes('foo, 'foo2)(
+      inScope('foo, 'foo2, 'foo3)(notBlank(value.a) forAttribute 'a),
+      inScope('foo1)(notBlank(value.b) forAttribute 'b),
+      inScope('foo2)(notBlank(value.c) forAttribute 'c)
+    ) should beInvalidWithError(
+        new IsEmptyStringError(Path.wrap("/a"))
       )
   }
 

@@ -13,14 +13,34 @@ package object scopes {
 
   implicit class tToScopeValidation(val value: Any) extends AnyVal {
 
-    def validateScoped[S](scope: S*)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
-      validateInScope(value, scope: _*)(sv: _*)
+    def validateScoped[S](scope: S)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+      validateInScope(value, scope)(sv: _*)
+    }
+
+    def validateAnyScope[S](scopes: S*)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+      validateForAnyScope(value, scopes: _*)(sv: _*)
+    }
+
+    def validateAllScopes[S](scopes: S*)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+      validateForAllScopes(value, scopes: _*)(sv: _*)
     }
   }
 
-  def validateInScope[S](value: Any, scope: S*)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+  def validateInScope[S](value: Any, scope: S)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+    validateScopeWithOptions(value, sv)(_.validationsForScope(scope))
+  }
+
+  def validateForAnyScope[S](value: Any, scopes: S*)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+    validateScopeWithOptions(value, sv)(_.validationsForOneOf(scopes))
+  }
+
+  def validateForAllScopes[S](value: Any, scopes: S*)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+    validateScopeWithOptions(value, sv)(_.validationsForAllOf(scopes))
+  }
+
+  private def validateScopeWithOptions[S](value: Any, sv: Seq[ScopedValidations[S]])(f: ScopedValidations[S] => List[DValidation[_]]) = {
     var builder = List.newBuilder[DValidation[_]]
-    for (s <- sv) { builder ++= s.validationsForOneOf(scope) }
+    for (s <- sv) { builder ++= f(s) }
     dvalidation.applyValidations(builder.result(), value)
   }
 
@@ -54,7 +74,7 @@ package object scopes {
 
   trait PathScope {
     implicit def pathScope = new Scope[PathString] {
-      import Path._
+      import net.atinu.dvalidation.Path._
 
       def matches(parentScope: PathString, subScope: PathString): Boolean = {
         val ep = parentScope.elements
