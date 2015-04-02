@@ -59,6 +59,19 @@ class ScopeSpec extends ValidationSuite {
       )
   }
 
+  test("a scoped validation can have validate for multile scopes") {
+    val value = new CTest("", "", "")
+    import SymbolScope._
+    value.validateScoped('foo, 'foo2)(
+      inScope('foo)(notBlank(value.a) forAttribute 'a),
+      inScope('foo1)(notBlank(value.b) forAttribute 'b),
+      inScope('foo2)(notBlank(value.c) forAttribute 'c)
+    ) should beInvalidWithErrors(
+        new IsEmptyStringError(Path.wrap("/a")),
+        new IsEmptyStringError(Path.wrap("/c"))
+      )
+  }
+
   test("a custom scope can be inferred from a scalaz.Equals instance") {
     val value = new CTest("", "", "")
     import EqualityScope._

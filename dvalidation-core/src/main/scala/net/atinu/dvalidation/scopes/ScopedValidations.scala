@@ -6,8 +6,15 @@ case class ScopedValidations[T](scopes: List[T], scopeDef: Scope[T], validations
 
   def matches(expectedScope: T): Boolean = scopes.exists(scope => scopeDef.matches(expectedScope, scope))
 
-  def validationsFor(expectedScope: T): List[DValidation[_]] =
-    if (matches(expectedScope)) validations.apply()
+  def validationsForOneOf(expectedScopes: Seq[T]): List[DValidation[_]] =
+    applyCond(expectedScopes.exists(matches))
+
+  def validationsForScope(expectedScope: T): List[DValidation[_]] =
+    applyCond(matches(expectedScope))
+
+  private def applyCond(p: Boolean) = {
+    if (p) validations.apply()
     else Nil
+  }
 
 }

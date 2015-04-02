@@ -13,14 +13,14 @@ package object scopes {
 
   implicit class tToScopeValidation(val value: Any) extends AnyVal {
 
-    def validateScoped[S](scope: S)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
-      validateInScope(value, scope)(sv: _*)
+    def validateScoped[S](scope: S*)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+      validateInScope(value, scope: _*)(sv: _*)
     }
   }
 
-  def validateInScope[S](value: Any, scope: S)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
+  def validateInScope[S](value: Any, scope: S*)(sv: ScopedValidations[S]*)(implicit sd: Scope[S]): DValidation[_] = {
     var builder = List.newBuilder[DValidation[_]]
-    for (s <- sv) { builder ++= s.validationsFor(scope) }
+    for (s <- sv) { builder ++= s.validationsForOneOf(scope) }
     dvalidation.applyValidations(builder.result(), value)
   }
 
