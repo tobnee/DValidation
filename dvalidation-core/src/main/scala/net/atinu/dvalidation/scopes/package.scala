@@ -77,9 +77,7 @@ package object scopes {
       import net.atinu.dvalidation.Path._
 
       def matches(parentScope: PathString, subScope: PathString): Boolean = {
-        val ep = parentScope.elements
-        val ec = subScope.elements
-        ep.size <= ec.size && ec.take(ep.size) == ep
+        subScope.unwrap startsWith parentScope.unwrap
       }
     }
   }
