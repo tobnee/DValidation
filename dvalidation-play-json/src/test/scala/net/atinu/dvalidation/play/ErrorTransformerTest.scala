@@ -1,8 +1,8 @@
 package net.atinu.dvalidation.play
 
-import net.atinu.dvalidation.errors.{IsEmptyStringError, IsNoneError}
+import net.atinu.dvalidation.errors.{ IsEmptyStringError, IsNoneError }
 import net.atinu.dvalidation.play.util.JsonMatcher
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.{ FunSuite, Matchers }
 import play.api.libs.json.JsString
 
 class ErrorTransformerTest extends FunSuite with Matchers with JsonMatcher {

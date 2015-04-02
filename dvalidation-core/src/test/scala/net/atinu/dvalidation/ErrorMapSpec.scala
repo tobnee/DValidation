@@ -33,7 +33,9 @@ class ErrorMapSpec extends ValidationSuite {
   }
 
   test("Error can be mapped with lifted function") {
-    notBlank("")(v1 => new CustomValidationError(v1.value, "a.b.c", v1.parameters, v1.path)) should beInvalidWithError(new CustomValidationError("", "a.b.c"))
+    // the function type parameter seems to be required by 2.10 not 2.11
+    val blank = notBlank("")((v1: IsEmptyStringError) => new CustomValidationError(v1.value, "a.b.c", v1.parameters, v1.path))
+    blank should beInvalidWithError(new CustomValidationError("", "a.b.c"))
   }
 
   test("Error can be mapped with a factory") {

@@ -35,21 +35,21 @@ object Build {
         </developers>)
   )
 
-  val scalazVersion = "7.1.0"
+  val scalazVersion = "7.1.1"
 
   def dvalProject(id: String): Project = Project(id, file("dvalidation-" + id))
     .settings(
       name := s"dvalidation-$id",
       organization := "net.atinu",
       version := "0.3-SNAPSHOT",
-      scalaVersion := "2.11.2",
+      scalaVersion := "2.11.6",
       scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature"),
-      crossScalaVersions := Seq("2.11.2", "2.10.4"),
+      crossScalaVersions := Seq("2.11.6", "2.10.5"),
       resolvers ++= Seq(
         Resolver.sonatypeRepo("releases")
       )
     ).settings(
-      libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
+      libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
     ).settings(RepoSettings: _*)
      .settings(scalariformSettings: _*)
 

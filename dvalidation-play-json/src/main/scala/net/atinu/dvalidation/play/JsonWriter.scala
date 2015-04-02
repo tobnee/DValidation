@@ -1,9 +1,9 @@
 package net.atinu.dvalidation.play
 
+import play.api.libs.json._
 import net.atinu.dvalidation.{ DValidation, DomainError, DomainErrors }
 import net.atinu.dvalidation.play.JsonConf._
-
-import play.api.libs.json._
+import net.atinu.dvalidation._
 
 import scalaz.{ Success, Failure, Validation }
 
@@ -66,7 +66,7 @@ class JsonWriter(
    * Given a [[scalaz.Failure]] return an empty [[JsArray]] otherwise the result of [[renderAll()]]
    */
   def renderFailure(validation: DValidation[_]): JsArray =
-    validation.errorView.map(renderAll).getOrElse(JsArray(Nil))
+    validation.fold(renderAll, _ => JsArray(Nil))
 
   /**
    * Given a [[scalaz.Failure]] return [[renderAll()]] within a JSON object or a JSON representation of the value object
