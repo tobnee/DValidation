@@ -26,12 +26,6 @@ package object dvalidation {
     def validateWith(validations: DValidation[_]*): DValidation[T] = {
       applyValidations(validations, value)
     }
-
-    def validateCategory[T](scope: T)(sv: ScopedValidations[T]*)(implicit sd: Scope[T]): DValidation[_] = {
-      var builder = List.newBuilder[DValidation[_]]
-      for (s <- sv) { builder ++= s.validationsFor(scope) }
-      validateWith(builder.result(): _*)
-    }
   }
 
   implicit class tryToValidation[T](val value: Try[T]) extends AnyVal {
