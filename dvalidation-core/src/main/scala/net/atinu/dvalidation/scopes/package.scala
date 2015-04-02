@@ -44,6 +44,14 @@ package object scopes {
 
   object EqualityScope extends EqualityScope
 
+  trait AnyEqualScope[T] extends Scope[T] {
+    def matches(x: T, y: T): Boolean = x == y
+  }
+
+  object AnyEqualScope {
+    def equalityScope[T] = new AnyEqualScope[T] {}
+  }
+
   trait PathScope {
     implicit def pathScope = new Scope[PathString] {
       import Path._
