@@ -42,7 +42,7 @@ object ErrorTransformer {
 }
 
 /**
- * Transform a JSON representation of a [[DomainError]]
+ * Transforms a JSON representation of a [[DomainError]]
  */
 trait ErrorTransformer {
 

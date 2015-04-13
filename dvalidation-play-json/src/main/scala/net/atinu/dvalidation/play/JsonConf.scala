@@ -44,7 +44,10 @@ object JsonConf {
   object PathAsArray extends PathPrinter {
     import net.atinu.dvalidation.Path._
     def apply(error: DomainError) =
-      PathPrinter(error.path.segments.map(_.value))
+      PathPrinter(error.path.segments.map {
+        case PathIndex(v) => JsNumber(v)
+        case PathSegment(v) => JsString(v)
+      })
   }
 
   object FieldPrinter extends PrinterFactory {
@@ -87,18 +90,18 @@ object JsonConf {
 
   trait ValuePrinter extends JsonPrinter
 
-  object ExtValuePrinter extends PrinterFactory {
+  object WithExpectedValuePrinter extends PrinterFactory {
     val key = "expected"
   }
 
-  trait ExtValuePrinter extends ValuePrinter {
+  trait WithExpectedValuePrinter extends ValuePrinter {
     def apply(error: DomainError): JsObject = error match {
       case e: DomainErrorWithExpectation => applyValue(error) ++ applyExpected(e)
       case e => applyValue(e)
     }
 
     def applyExpected(error: DomainErrorWithExpectation): JsObject =
-      ExtValuePrinter(applyContent(error.expected))
+      WithExpectedValuePrinter(applyContent(error.expected))
 
     def applyValue(error: DomainError): JsObject
 
@@ -110,7 +113,7 @@ object JsonConf {
   /**
    * given a [[DomainError.value]] x -> a string x.toString
    */
-  object ToStringValue extends ExtValuePrinter {
+  object ToStringValue extends WithExpectedValuePrinter {
     def applyValue(error: DomainError): JsObject =
       ValuePrinter(applyContent(error.value))
 
@@ -138,7 +141,7 @@ object JsonConf {
    * Translate a [[DomainError.value]] to a Json Representation depending on the type or
    * value of the error value
    */
-  class MappedValue(private val mapper: ValueMapper) extends ExtValuePrinter {
+  class MappedValue(private val mapper: ValueMapper) extends WithExpectedValuePrinter {
 
     /**
      * build a Json representation for a [[DomainError.value]]

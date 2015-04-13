@@ -56,7 +56,7 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     import net.atinu.dvalidation.Path._
     val e1 = new IsEmptyStringError("/tests/[0]/b".asPath)
     val single = JsonWriter(path = JsonConf.PathAsArray).renderSingle(e1)
-    single should containKeyValue("path" -> Json.arr("tests", "0", "b"))
+    single should containKeyValue("path" -> Json.arr("tests", 0, "b"))
   }
 
   test("Should render expected values") {
@@ -109,7 +109,7 @@ class JsonWriterTest extends FunSuite with Matchers with JsonMatcher {
     val e3 = new IsNoneError("/tests/[0]/df".asPath)
     val e4 = new IsNoneError("/a/b/c/d".asPath)
     val e = DomainErrors.withErrors(e4, e2, e1, e3)
-    println(Json.prettyPrint(JsonWriter.applyH().renderAll(e)))
+    //println(Json.prettyPrint(JsonWriter.applyH().renderAll(e)))
   }
 
 }

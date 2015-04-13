@@ -9,6 +9,18 @@ import scalaz.{ Success, Failure, Validation }
 
 object JsonWriter {
 
+  /**
+   * Build a configured JsonWriter
+   * @param path represent [[DomainError.path]]
+   * @param field represent the last [[DomainError.path]] segment
+   * @param msgKey represent [[DomainError.msgKey]]
+   * @param value represent [[DomainError.value]]
+   * @param args represent [[DomainError.args]]
+   * @param msg represent a [[DomainError]] as string
+   * @param errorTransformer replaces / adds / removes information based on their type or content
+   * @see default
+   * @return a configured JSON writer
+   */
   def apply(
     path: PathPrinter = JsonConf.SlashSeparatedPath,
     field: FieldPrinter = JsonConf.NoFieldPrinter,
@@ -16,7 +28,7 @@ object JsonWriter {
     value: ValuePrinter = JsonConf.ToStringValue,
     args: ArgsPrinter = JsonConf.NoArgs,
     msg: MsgPrinter = JsonConf.NoMsgPrinter,
-    errorTransformer: ErrorTransformer = NoErrorTransformer) =
+    errorTransformer: ErrorTransformer = NoErrorTransformer): JsonWriter =
     new JsonWriter(path, field, msgKey, value, args, msg, errorTransformer)
 
   def applyH(
@@ -28,7 +40,20 @@ object JsonWriter {
     errorTransformer: ErrorTransformer = NoErrorTransformer) =
     new HJsonWriter(field, msgKey, value, args, msg, errorTransformer)
 
-  val default: JsonWriter = apply()
+  /**
+   * A default JSON writer yielding errors similar to:
+   *
+   * {{{
+   *   {
+   *  "errors" : [ {
+   *    "path" : "/tests/[0]/b",
+   *    "msgKey" : "error.dvalidation.emptyString",
+   *    "value" : ""
+   *   }, ... ]
+   * }
+   * }}}
+   */
+  val default = apply()
 
   val hierarchical: HJsonWriter = applyH()
 }
@@ -94,7 +119,7 @@ class HJsonWriter(field: FieldPrinter,
 }
 
 /**
- * A configurable and extendable JSON builder for [[DValidation]] related entities
+ * A configurable and extensible JSON builder for [[DValidation]] related entities
  * @param path represent [[DomainError.path]]
  * @param field represent the last [[DomainError.path]] segment
  * @param msgKey represent [[DomainError.msgKey]]
@@ -113,7 +138,7 @@ class JsonWriter(
     errorTransformer: ErrorTransformer) {
 
   /**
-   * For each [[DomainError]] a corresponding entry in the [[JsArray]]
+   * Map each [[DomainError]] to a corresponding entry in a [[JsArray]]
    * @see [[renderSingle()]]
    */
   def renderAll(errors: DomainErrors): JsArray = {
@@ -121,7 +146,10 @@ class JsonWriter(
   }
 
   /**
-   * Given the [[JsonConf]] class parameters represent a single [[DomainError]]
+   * Given the [[JsonConf]] class parameters build the JSON of a single [[DomainError]].
+   * The representation of individual fields depend on the class parameters. After the
+   * application of single field transformations (value, path, mskKey, ...) the errorTransformer
+   * can be used to transform the JSON into the final representation.
    */
   def renderSingle(error: DomainError): JsObject = {
     val res = path.apply(error) ++
