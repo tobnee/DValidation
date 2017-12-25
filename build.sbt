@@ -2,7 +2,7 @@ name := "dvalidation"
 
 organization := "net.atinu"
 
-version := "0.2"
+version := "0.3"
 
 scalaVersion := "2.11.2"
 
@@ -14,7 +14,7 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )
 
-val scalazVersion = "7.1.0"
+val scalazVersion = "7.2.7"
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion % "provided"
 
@@ -58,4 +58,3 @@ pomExtra := (
         <url>http://atinu.net/</url>
       </developer>
     </developers>)
-
