@@ -26,11 +26,11 @@ resolvers += Resolver.sonatypeRepo("releases")
 ```
 
 The current release targets the Scala 2.10.x and 2.11.x series together with
-scalaz 7.0.6 or 7.1.0.
+scalaz 7.0.6 or 7.2.7.
 
 ```
-libraryDependencies += "net.atinu" %% "dvalidation" % "0.2"
-libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.1.0"
+libraryDependencies += "net.atinu" %% "dvalidation" % "0.3"
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.7"
 ```
 ## Basic Usage
 Lets start with this simple domain model: 
