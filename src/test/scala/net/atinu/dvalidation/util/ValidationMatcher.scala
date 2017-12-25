@@ -11,7 +11,7 @@ object ValidationMatcher {
   def fail(msg: String) = MatchResult(false, msg, "")
 
   def matchValidations(validation: DValidation[_], expect: NonEmptyList[DomainError]): MatchResult = {
-    def errorDisplay = expect.list.mkString(",")
+    def errorDisplay = expect.list.toList.mkString(",")
     validation match {
       case Success(v) => fail(s"expected ($errorDisplay) got successful validation ($v)")
       case Failure(e) if e == DomainErrors.fromNel(expect) => succ("validation successful")
@@ -44,7 +44,7 @@ trait ValidationMatcher {
 
   class ValidationValueIsFailureMatcher[T <: DomainError](value: T) extends Matcher[DValidation[_]] {
     override def apply(validation: DValidation[_]): MatchResult = {
-      val valuesList: NonEmptyList[T] = NonEmptyList.apply(value)
+      val valuesList: NonEmptyList[DomainError] = NonEmptyList.apply(value)
       matchValidations(validation, valuesList)
     }
   }
@@ -53,7 +53,7 @@ trait ValidationMatcher {
     override def apply(validation: DValidation[_]): MatchResult = {
       if (values.isEmpty) fail("expected at least one expected error in test")
       else {
-        val valuesList: NonEmptyList[T] = NonEmptyList.apply(values.head, values.tail: _*)
+        val valuesList: NonEmptyList[DomainError] = NonEmptyList.apply(values.head, values.tail: _*)
         matchValidations(validation, valuesList)
       }
     }

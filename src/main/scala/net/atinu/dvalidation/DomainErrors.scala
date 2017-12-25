@@ -1,7 +1,7 @@
 package net.atinu.dvalidation
 
 import scala.reflect.ClassTag
-import scalaz.{ Show, Equal, Semigroup, NonEmptyList }
+import scalaz.{ Equal, NonEmptyList, Semigroup, Show }
 
 object DomainErrors {
 
@@ -13,10 +13,10 @@ object DomainErrors {
     if (errors.isEmpty) throw new IllegalArgumentException("DomainErrors depend on at least one DomainError")
     else DomainErrors(errors.head, errors.tail: _*)
 
-  def fromNel[T <: DomainError](nel: NonEmptyList[T]): DomainErrors = new DomainErrors(nel)
+  def fromNel(nel: NonEmptyList[DomainError]): DomainErrors = new DomainErrors(nel)
 
   def unapplySeq[A](e: DomainErrors): Option[(DomainError, List[DomainError])] =
-    NonEmptyList.unapplySeq(e.errors)
+    NonEmptyList.unapply(e.errors).map { case (e, errors) => (e, errors.toList) }
 
   implicit def domainErrorsInstances =
     new Semigroup[DomainErrors] with Equal[DomainErrors] with Show[DomainErrors] {
@@ -38,13 +38,13 @@ final class DomainErrors private (e: NonEmptyList[DomainError]) {
 
   def errors: NonEmptyList[DomainError] = e
 
-  def asList: List[DomainError] = errors.list
+  def asList: List[DomainError] = errors.list.toList
 
   def firstError: DomainError = errors.head
 
   def errorsOfType[T <: DomainError](implicit ct: ClassTag[T]): List[T] = {
     val runtimeClass = ct.runtimeClass
-    errors.list.filter(error => runtimeClass.isInstance(error)).asInstanceOf[List[T]]
+    errors.list.toList.filter(error => runtimeClass.isInstance(error)).asInstanceOf[List[T]]
   }
 
   def map(t: DomainError => DomainError): DomainErrors =
@@ -56,7 +56,7 @@ final class DomainErrors private (e: NonEmptyList[DomainError]) {
   def append(e: DomainErrors) =
     new DomainErrors(this.errors.append(e.errors))
 
-  override def toString = errors.list.mkString(",")
+  override def toString = errors.list.toList.mkString(",")
 
   override def equals(value: Any) = value match {
     case v: DomainErrors =>
@@ -66,6 +66,6 @@ final class DomainErrors private (e: NonEmptyList[DomainError]) {
 
   override def hashCode(): Int = errors.hashCode()
 
-  def prettyPrint = errors.list.mkString("-->\n", "\n", "\n<--")
+  def prettyPrint = errors.list.toList.mkString("-->\n", "\n", "\n<--")
 }
 

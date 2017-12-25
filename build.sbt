@@ -2,7 +2,7 @@ name := "dvalidation"
 
 organization := "net.atinu"
 
-version := "0.2"
+version := "7.2.7.0.1"
 
 scalaVersion := "2.11.2"
 
@@ -14,7 +14,7 @@ resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )
 
-val scalazVersion = "7.1.0"
+val scalazVersion = "7.2.7"
 
 libraryDependencies += "org.scalaz" %% "scalaz-core" % scalazVersion % "provided"
 
@@ -30,32 +30,4 @@ scalariformSettings
 
 publishMavenStyle := true
 
-publishTo := {
-  val nexus = "https://oss.sonatype.org/"
-  if (isSnapshot.value)
-    Some("snapshots" at nexus + "content/repositories/snapshots")
-  else
-    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-}
-
-pomExtra := (
-  <url>https://github.com/tobnee/DValidation</url>
-    <licenses>
-      <license>
-        <name>Apache 2 license</name>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        <distribution>repo</distribution>
-      </license>
-    </licenses>
-    <scm>
-      <url>git@github.com:tobnee/DValidation.git</url>
-      <connection>scm:git:git@github.com:tobnee/DValidation.git</connection>
-    </scm>
-    <developers>
-      <developer>
-        <id>tobnee</id>
-        <name>Tobias Neef</name>
-        <url>http://atinu.net/</url>
-      </developer>
-    </developers>)
 
